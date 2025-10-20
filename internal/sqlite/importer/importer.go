@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/Sternrassler/eve-sde/internal/sqlite/navigation"
 )
 
 // Importer importiert JSONL-Daten in SQLite
@@ -221,4 +222,9 @@ func (imp *Importer) convertValueForSQL(value interface{}, targetType reflect.Ty
 	}
 
 	return value
+}
+
+// InitializeNavigationViews creates navigation views in the database
+func (imp *Importer) InitializeNavigationViews() error {
+	return navigation.InitializeViews(imp.db)
 }

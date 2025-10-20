@@ -22,3 +22,4 @@ Thumbs.db
 # Editor settings
 .vscode/
 .idea/
+sde-to-sqlite
