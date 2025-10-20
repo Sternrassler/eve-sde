@@ -37,7 +37,7 @@ func main() {
 	jsonlDir := filepath.Join(*dataDir, "jsonl")
 	sqliteDB := filepath.Join(*dataDir, "sqlite", "eve-sde.db")
 
-	// 1. Version Check
+	// 1. Version Check (und DB-Löschung bei --force)
 	if !*forceUpdate {
 		log.Println("→ Checking for SDE updates...")
 		needsUpdate, latest, local, err := sdeversion.NeedsUpdate(sqliteDB)
@@ -56,6 +56,13 @@ func main() {
 		}
 	} else {
 		log.Println("→ Force mode enabled, skipping version check")
+		// Bei --force alte DB löschen falls vorhanden
+		if _, err := os.Stat(sqliteDB); err == nil {
+			log.Printf("→ Removing existing database: %s", sqliteDB)
+			if err := os.Remove(sqliteDB); err != nil {
+				log.Fatalf("Failed to remove existing database: %v", err)
+			}
+		}
 	}
 
 	// 2. Download SDE
