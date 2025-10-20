@@ -26,31 +26,50 @@ jobs:
       - name: Check for SDE Updates
         id: version_check
         run: |
-          # Temporäre leere DB für Version-Check erstellen
+          # Version Check über internal/sde/version Package
+          cat > /tmp/version-check.go <<'EOF'
+          package main
+          import (
+            "fmt"
+            "os"
+            sdeversion "github.com/Sternrassler/eve-sde/internal/sde/version"
+          )
+          func main() {
+            latest, err := sdeversion.GetLatestVersion()
+            if err != nil {
+              fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+              os.Exit(1)
+            }
+            local, _ := sdeversion.GetLocalVersion("data/sqlite/eve-sde.db")
+            
+            fmt.Printf("LATEST_BUILD=%d\n", latest.BuildNumber)
+            fmt.Printf("LATEST_DATE=%s\n", latest.ReleaseDate.Format("2006-01-02"))
+            if local != nil {
+              fmt.Printf("LOCAL_BUILD=%d\n", local.BuildNumber)
+              fmt.Printf("NEEDS_UPDATE=%t\n", latest.BuildNumber != local.BuildNumber)
+            } else {
+              fmt.Printf("LOCAL_BUILD=0\n")
+              fmt.Printf("NEEDS_UPDATE=true\n")
+            }
+          }
+          EOF
+          
+          # Ausführen und Variablen setzen
           mkdir -p data/sqlite
+          go run /tmp/version-check.go > /tmp/version-vars.env
           
-          # Version Check durchführen
-          go run ./cmd/sde-to-sqlite --db data/sqlite/eve-sde.db --check-version > /tmp/version-check.log 2>&1 || true
-          
-          # Parse Latest Version aus Log
-          LATEST_BUILD=$(grep "Latest SDE:" /tmp/version-check.log | awk '{print $4}')
-          LATEST_DATE=$(grep "Latest SDE:" /tmp/version-check.log | awk '{print $5}' | tr -d '()')
-          LOCAL_BUILD=$(grep "Local DB:" /tmp/version-check.log | awk '{print $4}')
-          
+          # Variablen in GITHUB_OUTPUT schreiben
+          source /tmp/version-vars.env
           echo "latest_build=$LATEST_BUILD" >> $GITHUB_OUTPUT
           echo "latest_date=$LATEST_DATE" >> $GITHUB_OUTPUT
           echo "local_build=$LOCAL_BUILD" >> $GITHUB_OUTPUT
+          echo "needs_update=$NEEDS_UPDATE" >> $GITHUB_OUTPUT
           
-          # Prüfe ob Update nötig (Local DB ist "none" bei erster Ausführung)
-          if [ "$LOCAL_BUILD" = "none" ] || [ "$LATEST_BUILD" != "$LOCAL_BUILD" ]; then
-            echo "needs_update=true" >> $GITHUB_OUTPUT
+          if [ "$NEEDS_UPDATE" = "true" ]; then
             echo "::notice::New SDE version available: Build $LATEST_BUILD ($LATEST_DATE)"
           else
-            echo "needs_update=false" >> $GITHUB_OUTPUT
             echo "::notice::SDE is up-to-date: Build $LATEST_BUILD"
           fi
-          
-          cat /tmp/version-check.log
 
       - name: Check if Release exists
         id: release_check
