@@ -49,6 +49,32 @@ Dieses Projekt dient der:
 - [ ] Diff/Update Mechanismus (nur Änderungen importieren)
 - [ ] Progress Tracking & Verbose Logging
 
+## Features
+
+### Navigation & Intelligence System (NEU in v0.2.0)
+
+Das Projekt bietet jetzt ein vollständiges Navigation- und Intelligence-System für EVE Online:
+
+- **Pathfinding**: Kürzeste Routen zwischen Systemen (Dijkstra via SQLite Recursive CTE)
+- **Travel Time Calculation**: Reisezeit-Berechnung mit optionalen Schiffs-Parametern
+- **Security Filtering**: Vermeidung von Low-Sec/Null-Sec Systemen
+- **Trade Hub Analysis**: Distanz zu Major Trade Hubs (Jita, Amarr, Dodixie, Rens, Hek)
+- **Region Intelligence**: Security-Zonen und Region-Statistiken
+
+**Beispiel:**
+```bash
+# Schnellste Route von Jita nach Amarr
+go run examples/navigation_example.go
+
+# Mit Interceptor-Parametern (schneller)
+go run examples/navigation_example.go -warp 6.0 -align 2.5
+
+# Nur High-Sec Route
+go run examples/navigation_example.go -safe
+```
+
+Siehe [docs/navigation.md](docs/navigation.md) und [examples/README.md](examples/README.md) für Details.
+
 ## Struktur
 
 ```text
@@ -56,23 +82,27 @@ eve-sde/
 ├── cmd/
 │   ├── sde-schema-gen/      # Schema-Generator CLI
 │   ├── sde-to-sqlite/       # SQLite-Import CLI
-│   └── sde-sync/            # Sync-Pipeline Orchestrator (NEW)
+│   └── sde-sync/            # Sync-Pipeline Orchestrator
 ├── internal/
 │   ├── schema/
 │   │   └── types/           # 53 generierte Go-Structs
 │   ├── sqlite/
 │   │   ├── schema/          # DDL-Generator
-│   │   └── importer/        # JSONL→SQLite Importer
+│   │   ├── importer/        # JSONL→SQLite Importer
+│   │   └── navigation/      # Navigation & Intelligence System (NEW)
 │   └── sde/
-│       └── version/         # Version Tracking (NEW)
+│       └── version/         # Version Tracking
 ├── data/                    # Lokale SDE-Kopien (gitignored)
 │   ├── jsonl/               # 52 JSONL-Dateien (~499 MB)
 │   ├── yaml/                # 52 YAML-Dateien (~160 MB)
 │   └── sqlite/              # eve-sde.db (~405 MB)
+├── examples/                # Beispiel-Programme (NEW)
+│   └── navigation_example.go
 ├── scripts/                 # Sync-, Transform- und Validierungslogik
 ├── docs/
 │   ├── adr/                 # Architekturentscheidungen (ADRs)
-│   └── sqlite-implementation.md  # SQLite-Dokumentation
+│   ├── sqlite-implementation.md  # SQLite-Dokumentation
+│   └── navigation.md        # Navigation System Dokumentation (NEW)
 └── .github/copilot-instructions.md  # Engineering-Richtlinien
 ```
 
