@@ -13,6 +13,7 @@ import (
 	sdeversion "github.com/Sternrassler/eve-sde/internal/sde/version"
 	"github.com/Sternrassler/eve-sde/internal/sqlite/importer"
 	"github.com/Sternrassler/eve-sde/internal/sqlite/schema"
+	"github.com/Sternrassler/eve-sde/internal/sqlite/views"
 )
 
 const appVersion = "0.1.0"
@@ -170,7 +171,7 @@ func main() {
 	// Initialize navigation views if we imported map data
 	if *importTable == "" || strings.HasPrefix(*importTable, "map") {
 		log.Println("Initializing navigation views...")
-		if err := imp.InitializeNavigationViews(); err != nil {
+		if err := views.InitializeNavigationViews(imp.DB()); err != nil {
 			log.Printf("Warning: Failed to initialize navigation views: %v", err)
 		} else {
 			log.Println("✓ Navigation views initialized")

@@ -1,17 +1,16 @@
 // Package navigation provides EVE Online navigation and route planning functionality
 // It includes pathfinding, travel time calculation, and trade hub analysis
+//
+// This is a high-level API layer built on top of the eve-sde SQLite database.
+// It requires navigation views to be initialized (see internal/sqlite/views package).
 package navigation
 
 import (
 	"database/sql"
-	_ "embed"
 	"encoding/json"
 	"fmt"
 	"math"
 )
-
-//go:embed views.sql
-var viewsSQL string
 
 // NavigationParams contains optional parameters for route calculation
 type NavigationParams struct {
@@ -25,12 +24,12 @@ type NavigationParams struct {
 
 // RouteResult contains calculated route information
 type RouteResult struct {
-	TotalSeconds       float64               `json:"total_seconds"`
-	TotalMinutes       float64               `json:"total_minutes"`
-	Jumps              int                   `json:"jumps"`
-	AvgSecondsPerJump  float64               `json:"avg_seconds_per_jump"`
-	Route              []int64               `json:"route"`
-	ParametersUsed     map[string]interface{} `json:"parameters_used"`
+	TotalSeconds      float64                `json:"total_seconds"`
+	TotalMinutes      float64                `json:"total_minutes"`
+	Jumps             int                    `json:"jumps"`
+	AvgSecondsPerJump float64                `json:"avg_seconds_per_jump"`
+	Route             []int64                `json:"route"`
+	ParametersUsed    map[string]interface{} `json:"parameters_used"`
 }
 
 // PathResult contains just the path information
@@ -50,14 +49,8 @@ const (
 	WarpCorrectionFactor   = 1.4  // Simplified warp time correction
 )
 
-// InitializeViews creates all navigation views in the database
-func InitializeViews(db *sql.DB) error {
-	_, err := db.Exec(viewsSQL)
-	if err != nil {
-		return fmt.Errorf("failed to initialize navigation views: %w", err)
-	}
-	return nil
-}
+// Note: InitializeViews has been moved to internal/sqlite/views package
+// Views must be initialized before using this API
 
 // CalculateAlignTime calculates exact align time from ship parameters
 // Formula: align_time = 1.386 * inertia_modifier * mass / 500000
@@ -69,22 +62,22 @@ func CalculateAlignTime(mass, inertiaModifier float64) float64 {
 // Reference: https://wiki.eveuniversity.org/Warp_time_calculation
 func CalculateWarpTime(distanceAU, warpSpeedAU float64) float64 {
 	const AU = 149597870700.0 // meters in 1 AU
-	
+
 	k := warpSpeedAU
 	j := math.Min(k/3.0, 2.0)
-	
+
 	// Phase 1: Acceleration (always 1 AU)
 	tAccel := 25.7312 / k
-	
+
 	// Phase 2: Deceleration
 	dDecel := (k * AU) / j
 	tDecel := (math.Log(k*AU) - math.Log(100)) / j // 100 m/s dropout speed
-	
+
 	// Phase 3: Cruise
 	totalDistanceMeters := distanceAU * AU
 	dCruise := math.Max(0, totalDistanceMeters-AU-dDecel)
 	tCruise := dCruise / (k * AU)
-	
+
 	return tAccel + tCruise + tDecel
 }
 
@@ -99,16 +92,16 @@ func getEffectiveParams(params *NavigationParams) (warpSpeed, alignTime, avgWarp
 	warpSpeed = DefaultWarpSpeed
 	alignTime = DefaultAlignTime
 	avgWarpDist = DefaultAvgWarpDistance
-	
+
 	if params == nil {
 		return
 	}
-	
+
 	if params.WarpSpeed != nil {
 		warpSpeed = *params.WarpSpeed
 		source = "provided"
 	}
-	
+
 	if params.AlignTime != nil {
 		alignTime = *params.AlignTime
 		source = "provided"
@@ -116,11 +109,11 @@ func getEffectiveParams(params *NavigationParams) (warpSpeed, alignTime, avgWarp
 		alignTime = CalculateAlignTime(*params.ShipMass, *params.InertiaModifier)
 		source = "calculated"
 	}
-	
+
 	if params.AvgWarpDistance != nil {
 		avgWarpDist = *params.AvgWarpDistance
 	}
-	
+
 	return
 }
 
@@ -158,34 +151,34 @@ func ShortestPath(db *sql.DB, fromSystemID, toSystemID int64, avoidLowSec bool) 
 		ORDER BY jumps ASC
 		LIMIT 1
 	`
-	
+
 	avoidLowSecInt := 0
 	if avoidLowSec {
 		avoidLowSecInt = 1
 	}
-	
+
 	var result PathResult
 	var routeJSON string
-	
+
 	err := db.QueryRow(query, fromSystemID, avoidLowSecInt, toSystemID).Scan(
 		&result.FromSystemID,
 		&result.ToSystemID,
 		&result.Jumps,
 		&routeJSON,
 	)
-	
+
 	if err == sql.ErrNoRows {
 		return nil, fmt.Errorf("no path found between systems %d and %d", fromSystemID, toSystemID)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to find path: %w", err)
 	}
-	
+
 	// Parse route JSON
 	if err := json.Unmarshal([]byte(routeJSON), &result.Route); err != nil {
 		return nil, fmt.Errorf("failed to parse route JSON: %w", err)
 	}
-	
+
 	return &result, nil
 }
 
@@ -193,26 +186,26 @@ func ShortestPath(db *sql.DB, fromSystemID, toSystemID int64, avoidLowSec bool) 
 func CalculateTravelTime(db *sql.DB, fromSystemID, toSystemID int64, params *NavigationParams) (*RouteResult, error) {
 	// Get effective parameters
 	warpSpeed, alignTime, avgWarpDist, source := getEffectiveParams(params)
-	
+
 	// Determine if we should avoid low-sec
 	avoidLowSec := false
 	if params != nil {
 		avoidLowSec = params.AvoidLowSec
 	}
-	
+
 	// Find the shortest path
 	path, err := ShortestPath(db, fromSystemID, toSystemID, avoidLowSec)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Calculate time per jump
 	warpTime := CalculateSimplifiedWarpTime(avgWarpDist, warpSpeed)
 	timePerJump := alignTime + warpTime + DefaultGateJumpDelay
-	
+
 	// Calculate total time
 	totalSeconds := float64(path.Jumps) * timePerJump
-	
+
 	result := &RouteResult{
 		TotalSeconds:      totalSeconds,
 		TotalMinutes:      totalSeconds / 60.0,
@@ -225,7 +218,7 @@ func CalculateTravelTime(db *sql.DB, fromSystemID, toSystemID int64, params *Nav
 			"source":     source,
 		},
 	}
-	
+
 	return result, nil
 }
 
@@ -233,26 +226,26 @@ func CalculateTravelTime(db *sql.DB, fromSystemID, toSystemID int64, params *Nav
 func CalculateTravelTimeExact(db *sql.DB, fromSystemID, toSystemID int64, params *NavigationParams) (*RouteResult, error) {
 	// Get effective parameters
 	warpSpeed, alignTime, avgWarpDist, source := getEffectiveParams(params)
-	
+
 	// Determine if we should avoid low-sec
 	avoidLowSec := false
 	if params != nil {
 		avoidLowSec = params.AvoidLowSec
 	}
-	
+
 	// Find the shortest path
 	path, err := ShortestPath(db, fromSystemID, toSystemID, avoidLowSec)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Calculate time per jump using exact formula
 	warpTime := CalculateWarpTime(avgWarpDist, warpSpeed)
 	timePerJump := alignTime + warpTime + DefaultGateJumpDelay
-	
+
 	// Calculate total time
 	totalSeconds := float64(path.Jumps) * timePerJump
-	
+
 	result := &RouteResult{
 		TotalSeconds:      totalSeconds,
 		TotalMinutes:      totalSeconds / 60.0,
@@ -266,6 +259,6 @@ func CalculateTravelTimeExact(db *sql.DB, fromSystemID, toSystemID int64, params
 			"formula":    "exact_3phase",
 		},
 	}
-	
+
 	return result, nil
 }

@@ -10,8 +10,9 @@ import (
 	"log"
 	"os"
 
+	"github.com/Sternrassler/eve-sde/internal/sqlite/views"
+	"github.com/Sternrassler/eve-sde/pkg/evedb/navigation"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/Sternrassler/eve-sde/internal/sqlite/navigation"
 )
 
 func main() {
@@ -43,7 +44,7 @@ func main() {
 	// Initialize views if requested
 	if *initViews {
 		log.Println("Initializing navigation views...")
-		if err := navigation.InitializeViews(db); err != nil {
+		if err := views.InitializeNavigationViews(db); err != nil {
 			log.Fatalf("Failed to initialize views: %v", err)
 		}
 		log.Println("✓ Navigation views initialized successfully")
@@ -55,7 +56,7 @@ func main() {
 	err = db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='view' AND name='v_stargate_graph'").Scan(&viewExists)
 	if err != nil || viewExists == 0 {
 		log.Println("⚠ Navigation views not found. Initializing...")
-		if err := navigation.InitializeViews(db); err != nil {
+		if err := views.InitializeNavigationViews(db); err != nil {
 			log.Fatalf("Failed to initialize views: %v", err)
 		}
 		log.Println("✓ Navigation views initialized")

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/Sternrassler/eve-sde/internal/sqlite/views"
 )
 
 // TestIntegrationViews tests the SQL views with an in-memory database
@@ -25,7 +26,7 @@ func TestIntegrationViews(t *testing.T) {
 	setupTestData(t, db)
 
 	// Initialize views
-	if err := InitializeViews(db); err != nil {
+	if err := views.InitializeNavigationViews(db); err != nil {
 		t.Fatalf("Failed to initialize views: %v", err)
 	}
 
@@ -105,7 +106,7 @@ func TestIntegrationShortestPath(t *testing.T) {
 	defer db.Close()
 
 	setupTestData(t, db)
-	if err := InitializeViews(db); err != nil {
+	if err := views.InitializeNavigationViews(db); err != nil {
 		t.Fatalf("Failed to initialize views: %v", err)
 	}
 
@@ -141,7 +142,7 @@ func TestIntegrationCalculateTravelTime(t *testing.T) {
 	defer db.Close()
 
 	setupTestData(t, db)
-	if err := InitializeViews(db); err != nil {
+	if err := views.InitializeNavigationViews(db); err != nil {
 		t.Fatalf("Failed to initialize views: %v", err)
 	}
 

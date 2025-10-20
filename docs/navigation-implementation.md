@@ -250,6 +250,30 @@ time_per_jump = align_time + warp_time + gate_jump_delay
 4. **Static Data Only**: No real-time gate status or player structures
 5. **No Filament Jumps**: One-way filament travel not modeled
 
+## View Persistence & Automated Recreation
+
+**Important**: Navigation views are automatically recreated during database imports.
+
+### Current Behavior (SQL Views)
+- All navigation views are defined in `internal/sqlite/navigation/views.sql`
+- Views use `CREATE VIEW IF NOT EXISTS` (idempotent)
+- `cmd/sde-to-sqlite` automatically calls `InitializeNavigationViews()` after map data import
+- GitHub Actions workflow (`sync-sde-release.yml`) uses `make sync-force` which:
+  1. Deletes old database (`rm -f data/sqlite/eve-sde.db`)
+  2. Downloads new SDE data
+  3. Runs `sde-to-sqlite` → **Views are automatically recreated**
+
+**Result**: Views are persistent in the sense that they're always recreated with each import. No manual intervention required.
+
+### Future Consideration (Custom Go Functions)
+If custom SQLite functions are added in the future (via `sql.Conn.RegisterFunc`):
+- **Problem**: Go functions are runtime-only, not stored in the database
+- **Solution**: Functions must be registered every time the database is opened
+- **Implementation**: Create `RegisterFunctions(db)` function to be called on DB connection
+- **Example Use Case**: Custom pathfinding algorithms, advanced calculations
+
+**Current Status**: All functionality is SQL-based (views + recursive CTEs) → no runtime registration needed.
+
 ## Future Enhancements (Documented)
 
 - Choke point detection (single-gate bottlenecks)

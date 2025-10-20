@@ -81,28 +81,31 @@ Siehe [docs/navigation.md](docs/navigation.md) und [examples/README.md](examples
 eve-sde/
 ├── cmd/
 │   ├── sde-schema-gen/      # Schema-Generator CLI
-│   ├── sde-to-sqlite/       # SQLite-Import CLI
+│   ├── sde-to-sqlite/       # SQLite-Import CLI (DB-Core)
 │   └── sde-sync/            # Sync-Pipeline Orchestrator
-├── internal/
+├── internal/                # DB-Core (nicht für externe Nutzung)
 │   ├── schema/
 │   │   └── types/           # 53 generierte Go-Structs
 │   ├── sqlite/
 │   │   ├── schema/          # DDL-Generator
 │   │   ├── importer/        # JSONL→SQLite Importer
-│   │   └── navigation/      # Navigation & Intelligence System (NEW)
+│   │   └── views/           # SQL Views (Navigation, Trade Hubs)
 │   └── sde/
 │       └── version/         # Version Tracking
+├── pkg/                     # API Layer (externe Go-APIs, optional)
+│   └── evedb/
+│       └── navigation/      # Navigation & Route Planning API
 ├── data/                    # Lokale SDE-Kopien (gitignored)
 │   ├── jsonl/               # 52 JSONL-Dateien (~499 MB)
 │   ├── yaml/                # 52 YAML-Dateien (~160 MB)
 │   └── sqlite/              # eve-sde.db (~405 MB)
-├── examples/                # Beispiel-Programme (NEW)
+├── examples/                # Beispiel-Programme (API-Nutzung)
 │   └── navigation_example.go
 ├── scripts/                 # Sync-, Transform- und Validierungslogik
 ├── docs/
 │   ├── adr/                 # Architekturentscheidungen (ADRs)
 │   ├── sqlite-implementation.md  # SQLite-Dokumentation
-│   └── navigation.md        # Navigation System Dokumentation (NEW)
+│   └── navigation.md        # Navigation System Dokumentation
 └── .github/copilot-instructions.md  # Engineering-Richtlinien
 ```
 

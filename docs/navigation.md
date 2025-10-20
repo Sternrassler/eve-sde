@@ -13,6 +13,9 @@ Das Navigation-System bietet:
 
 ## SQL Views
 
+> **Hinweis**: Alle Views werden automatisch bei jedem DB-Import neu erstellt via `sde-to-sqlite`. 
+> Siehe [Persistence & Recreation](#view-persistence) am Ende dieses Dokuments.
+
 ### v_stargate_graph
 Bidirektionaler Stargate-Connectivity-Graph für Pathfinding.
 
@@ -94,11 +97,34 @@ SELECT * FROM v_trade_hubs;
 
 ## Go API
 
-### Pathfinding
+**Architektur:** Die Navigation-API ist in zwei Ebenen getrennt:
+- **DB-Core** (`internal/sqlite/views`): SQL View Initialisierung
+- **API Layer** (`pkg/evedb/navigation`): Go-basierte Navigation-Funktionen
+
+**Setup (einmalig pro DB-Verbindung):**
 
 ```go
-import "github.com/Sternrassler/eve-sde/internal/sqlite/navigation"
+import (
+    "github.com/Sternrassler/eve-sde/pkg/evedb/navigation"
+    "github.com/Sternrassler/eve-sde/internal/sqlite/views"
+    "database/sql"
+    _ "github.com/mattn/go-sqlite3"
+)
 
+db, err := sql.Open("sqlite3", "data/sqlite/eve-sde.db")
+if err != nil {
+    log.Fatal(err)
+}
+
+// Views müssen einmalig initialisiert werden
+if err := views.InitializeNavigationViews(db); err != nil {
+    log.Fatal(err)
+}
+```
+
+### Shortest Path (Pathfinding)
+
+```go
 // Find shortest path
 path, err := navigation.ShortestPath(db, 30000142, 30002187, false)
 if err != nil {
@@ -416,6 +442,39 @@ go test ./internal/sqlite/navigation -bench=.
 - Wormhole Mapping (external data source)
 - Web API / REST Endpoints
 - Interactive D3.js Map Visualization
+
+## View Persistence
+
+### Automatische Recreation bei DB-Import
+
+Navigation-Views sind **nicht manuell zu pflegen**. Sie werden automatisch neu erstellt:
+
+1. **Bei jedem `sde-to-sqlite` Import**:
+   - `InitializeNavigationViews()` wird nach map data import aufgerufen
+   - `views.sql` nutzt `CREATE VIEW IF NOT EXISTS` (idempotent)
+
+2. **GitHub Actions Workflow** (`sync-sde-release.yml`):
+   - Täglicher Cron-Job prüft auf neue SDE-Versionen
+   - `make sync-force` löscht alte DB und importiert neu
+   - Views werden automatisch mit recreated → **kein manueller Eingriff nötig**
+
+3. **Lokale Entwicklung**:
+   ```bash
+   # Views manuell neu erstellen (falls nötig)
+   sqlite3 data/sqlite/eve-sde.db < internal/sqlite/navigation/views.sql
+   
+   # Oder: Force-Import
+   make sync-force
+   ```
+
+### Zukünftige Custom Functions (Hinweis für Entwickler)
+
+Falls später **Go-basierte SQLite Functions** (via `RegisterFunc`) hinzugefügt werden:
+- **Limitation**: Go Functions sind runtime-only, nicht in DB gespeichert
+- **Lösung**: Functions müssen bei jedem DB-Open registriert werden
+- **Pattern**: `navigation.RegisterFunctions(db)` beim Öffnen aufrufen
+
+**Aktuell**: Alle Features sind SQL-basiert (Views + Recursive CTEs) → keine Runtime-Registrierung nötig.
 
 ## References
 
