@@ -1,0 +1,62 @@
+name: Issue Dependency Enforcement
+
+on:
+  issues:
+    types: [closed, edited]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract dependencies & enforce
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const body = issue.body || "";
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Extract dependency block content only
+            const blockRegex = /(##+\s+Dependencies[\s\S]*?)(?=\n## |$)/i;
+            let block = '';
+            const m = body.match(blockRegex);
+            if (m) block = m[1];
+            else {
+              // Fallback: direct lines starting with Depends on:
+              const lines = body.split(/\n/).filter(l => /^Depends on:/i.test(l.trim()));
+              if (lines.length) block = lines.join('\n');
+            }
+            if (!block) { core.info('No dependency block.'); return; }
+
+            let ids = Array.from(new Set((block.match(/#[0-9]+/g) || []).map(x => parseInt(x.substring(1))))).sort((a,b)=>a-b);
+            if (!ids.length) { core.info('No numeric dependencies.'); return; }
+
+            if (!ids.length) { core.info('No numeric dependencies.'); return; }
+
+            core.info('Declared dependencies: ' + ids.join(', '));
+
+            if (issue.state !== 'closed') { core.info('Issue not closed -> no enforcement.'); return; }
+
+            const stillOpen = [];
+            for (const id of ids) {
+              try {
+                const { data } = await github.rest.issues.get({ owner, repo, issue_number: id });
+                if (data.state !== 'closed') stillOpen.push(data);
+              } catch (e) {
+                core.warning(`Could not fetch #${id}: ${e.message}`);
+              }
+            }
+
+            if (stillOpen.length) {
+              await github.rest.issues.update({ owner, repo, issue_number: issue.number, state: 'open' });
+              const list = stillOpen.map(i => `- #${i.number} (${i.title})`).join('\n');
+              await github.rest.issues.createComment({ owner, repo, issue_number: issue.number, body: `⛔ Dependencies noch offen:\n${list}` });
+              core.setOutput('reopened', true);
+            } else {
+              core.info('All dependencies resolved.');
+            }

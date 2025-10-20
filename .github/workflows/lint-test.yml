@@ -1,0 +1,19 @@
+name: Push Lint & Test
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint-test:
+    name: lint & test (push)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Run push lint & test
+        run: |
+          make push-ci

@@ -1,0 +1,22 @@
+name: PR Quality Gates
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  quality:
+    name: Normative & Policy Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Run PR quality gates
+        env:
+          CHECK_RELEASE_LABEL: ${{ (github.event_name == 'pull_request' && contains(toJson(github.event.pull_request.labels), 'release')) && '1' || '0' }}
+          COMMIT_LINT_RANGE: origin/main..HEAD
+        run: |
+          make pr-quality-gates-ci

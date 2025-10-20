@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# pre-commit – Lokale Pre-Commit Validierung
+# Aktivierung: git config core.hooksPath .githooks
+# Referenz: copilot-instructions.md Abschnitt 4
+
+set -euo pipefail
+
+echo "[pre-commit] Führe lokale Validierungen aus..."
+
+# 1. Normative Check
+if [ -x scripts/common/check-normative.sh ]; then
+    bash scripts/common/check-normative.sh || exit 1
+fi
+
+# 2. ADR Consistency Check
+if [ -x scripts/common/check-adr.sh ]; then
+    bash scripts/common/check-adr.sh || exit 1
+fi
+
+# 3. Commit Message Check (wird von Git Hook commit-msg erledigt – hier nur Info)
+echo "[pre-commit] Hinweis: Commit Message wird nach diesem Hook geprüft (commit-msg Hook)"
+
+# 4. Keine Secrets im Commit (einfache Heuristik)
+echo "[pre-commit] Prüfe auf potenzielle Secrets..."
+if git diff --cached --name-only | xargs grep -HnE "(password|secret|api[_-]?key|token|bearer)" -- 2>/dev/null; then
+    echo "[pre-commit] ⚠️  WARNUNG: Potenzielle Secrets gefunden – bitte Review durchführen"
+    echo "Falls gewollt, commit mit --no-verify überspringen (nicht empfohlen)"
+    # Nicht blockieren, nur Warnung
+fi
+
+echo "[pre-commit] ✅ Pre-Commit Checks erfolgreich"
+exit 0

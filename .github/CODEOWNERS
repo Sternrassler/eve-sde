@@ -1,0 +1,5 @@
+# Globaler Standard-Owner für das gesamte Repository
+* @Sternrassler
+
+# Diese Datei definiert Code-Eigentümer, die automatisch zum Review
+# hinzugefügt werden, wenn ein Pull Request die angegebenen Dateien betrifft.

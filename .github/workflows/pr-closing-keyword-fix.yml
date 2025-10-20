@@ -1,0 +1,162 @@
+name: Fix PR Closing Keywords
+
+on:
+  pull_request:
+    types: [opened, reopened, edited]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  fix-closing-keyword:
+    runs-on: ubuntu-latest
+    # Nur auf Draft PRs oder frischen PRs (innerhalb 5 Minuten nach Erstellung)
+    if: github.event.pull_request.draft == true || (github.event.action == 'opened' && github.event.pull_request.created_at)
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Analyze and fix closing keyword placement
+        id: analyze
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          
+          echo "::group::Analyzing PR Body"
+          
+          # Prüfe ob PR Body leer ist
+          if [ -z "$PR_BODY" ]; then
+            echo "✅ PR Body ist leer - keine Aktion erforderlich"
+            echo "action_needed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Speichere PR Body in temporäre Datei für Analyse
+          echo "$PR_BODY" > /tmp/pr_body_original.txt
+          
+          # Funktion: Extrahiere Text außerhalb von Code-Blöcken
+          extract_non_code_text() {
+            local file="$1"
+            awk '
+              BEGIN { in_code_block = 0 }
+              /^```/ { 
+                in_code_block = !in_code_block
+                next
+              }
+              !in_code_block { print }
+            ' "$file"
+          }
+          
+          # Extrahiere Text außerhalb Code-Blöcken
+          extract_non_code_text /tmp/pr_body_original.txt > /tmp/pr_body_no_code.txt
+          
+          # Suche nach Closing-Keywords (case-insensitive)
+          # Unterstützt: Closes #123, Fixes #456, Resolves #789
+          # Mit oder ohne Repository-Prefix: owner/repo#123
+          KEYWORD_REGEX='(closes|fixes|resolves)\s+(([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)?#[0-9]+)'
+          
+          if ! grep -iE "$KEYWORD_REGEX" /tmp/pr_body_no_code.txt > /dev/null; then
+            echo "✅ Kein Closing-Keyword gefunden - keine Aktion erforderlich"
+            echo "action_needed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Finde erstes Closing-Keyword (außerhalb Code-Blöcken)
+          FIRST_KEYWORD_LINE=$(grep -inE "$KEYWORD_REGEX" /tmp/pr_body_no_code.txt | head -1 | cut -d: -f1)
+          FIRST_KEYWORD_MATCH=$(grep -ioE "$KEYWORD_REGEX" /tmp/pr_body_no_code.txt | head -1)
+          
+          echo "Gefundenes Keyword in Zeile $FIRST_KEYWORD_LINE: $FIRST_KEYWORD_MATCH"
+          
+          # Prüfe Position: Ist Keyword in den ersten 100 Zeichen UND vor erster Heading?
+          FIRST_100_CHARS=$(head -c 100 /tmp/pr_body_original.txt)
+          FIRST_HEADING_LINE=$(grep -n '^##' /tmp/pr_body_original.txt | head -1 | cut -d: -f1 || echo "999")
+          
+          if [ "$FIRST_KEYWORD_LINE" -le 3 ] && [ "$FIRST_KEYWORD_LINE" -lt "$FIRST_HEADING_LINE" ]; then
+            # Prüfe auch ob Keyword in ersten 100 Zeichen ist
+            if echo "$FIRST_100_CHARS" | grep -iqE "$KEYWORD_REGEX"; then
+              echo "✅ Closing-Keyword ist bereits korrekt positioniert (Zeile $FIRST_KEYWORD_LINE, vor erster Heading)"
+              echo "action_needed=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          fi
+          
+          echo "⚠️  Closing-Keyword ist nicht optimal positioniert"
+          echo "Aktuelle Position: Zeile $FIRST_KEYWORD_LINE"
+          echo "Erste Heading: Zeile $FIRST_HEADING_LINE"
+          
+          # Extrahiere Issue-Nummer aus Keyword
+          ISSUE_REF=$(echo "$FIRST_KEYWORD_MATCH" | grep -oE '(([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)?#[0-9]+)')
+          echo "Issue-Referenz: $ISSUE_REF"
+          
+          # Erstelle neuen PR Body:
+          # 1. Entferne alle Closing-Keywords aus dem Original-Body
+          # 2. Füge "Closes #<NR>" ganz oben ein
+          
+          # Normalisiere Keyword zu "Closes" für Konsistenz
+          NEW_KEYWORD="Closes $ISSUE_REF"
+          
+          # Entferne alte Keywords (case-insensitive, alle Varianten)
+          sed -E "s/(closes|fixes|resolves)\s+(([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)?#[0-9]+)//gi" /tmp/pr_body_original.txt > /tmp/pr_body_cleaned.txt
+          
+          # Entferne führende Leerzeilen aus gereinigtem Body
+          sed -i '/./,$!d' /tmp/pr_body_cleaned.txt
+          
+          # Erstelle neuen Body mit Keyword ganz oben
+          {
+            echo "$NEW_KEYWORD"
+            echo ""
+            cat /tmp/pr_body_cleaned.txt
+          } > /tmp/pr_body_new.txt
+          
+          # Speichere für nächsten Step
+          echo "new_keyword=$NEW_KEYWORD" >> $GITHUB_OUTPUT
+          echo "action_needed=true" >> $GITHUB_OUTPUT
+          
+          echo "::endgroup::"
+          
+          echo "::group::New PR Body Preview"
+          echo "--- UPDATED PR BODY (First 500 chars) ---"
+          head -c 500 /tmp/pr_body_new.txt
+          echo ""
+          echo "---"
+          echo "::endgroup::"
+
+      - name: Update PR body
+        if: steps.analyze.outputs.action_needed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          
+          echo "Aktualisiere PR #$PR_NUMBER Body..."
+          
+          # Update PR Body via GitHub CLI
+          gh pr edit "$PR_NUMBER" --body-file /tmp/pr_body_new.txt
+          
+          echo "✅ PR Body erfolgreich aktualisiert"
+
+      - name: Add comment (optional)
+        if: steps.analyze.outputs.action_needed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          NEW_KEYWORD: ${{ steps.analyze.outputs.new_keyword }}
+        run: |
+          # Optionaler Kommentar zur Info
+          cat <<EOF > /tmp/pr_comment.md
+          ✅ **Closing-Keyword automatisch korrigiert**
+
+          Das Closing-Keyword wurde an die erste Position verschoben: \`$NEW_KEYWORD\`
+
+          **Grund:** Optimale Platzierung für automatisches Issue-Closing durch GitHub.
+
+          > 🤖 _Automatische Korrektur durch GitHub Action \`.github/workflows/pr-closing-keyword-fix.yml\`_
+          EOF
+          
+          gh pr comment "$PR_NUMBER" --body-file /tmp/pr_comment.md

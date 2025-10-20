@@ -1,0 +1,5 @@
+blank_issues_enabled: false # verhindert freien "Blank Issue" Button
+contact_links:
+  - name: ADR Index
+    url: https://github.com/Sternrassler/swdc-ai-assist-1/tree/main/docs/adr
+    about: Überblick über akzeptierte Architekturentscheidungen

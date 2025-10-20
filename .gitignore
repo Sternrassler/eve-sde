@@ -1,0 +1,21 @@
+# General build artifacts
+/dist/
+/build/
+/tmp/
+
+# Dependency caches
+node_modules/
+vendor/
+.pkgs/
+
+# Environment files
+.env
+.env.*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor settings
+.vscode/
+.idea/

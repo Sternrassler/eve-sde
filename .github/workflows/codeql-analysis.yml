@@ -1,0 +1,46 @@
+# CodeQL Scaffold (Issue #5)
+# Sprachen aktuell auskommentiert – aktivieren sobald produktiver Quellcode vorliegt.
+# Aktivierung: Kommentarzeichen unter 'language' entfernen und ggf. build steps ergänzen.
+
+name: CodeQL Analysis
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 3 * * 1" # wöchentlich Montag 03:00 UTC
+
+jobs:
+  analyze:
+    name: Analyze (CodeQL)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["none"] # Placeholder bis echte Sprachen aktiviert (Issue #5)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Skip placeholder
+        if: ${{ matrix.language == 'none' }}
+        run: |
+          echo 'CodeQL placeholder – keine aktiven Sprachen (Issue #5).'
+          echo 'Setze matrix.language auf z.B. "go" sobald produktiver Code vorhanden ist.'
+      - name: Init CodeQL
+        if: ${{ matrix.language != 'none' }}
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+      - name: Perform CodeQL Analysis
+        if: ${{ matrix.language != 'none' }}
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"

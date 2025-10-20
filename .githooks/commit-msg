@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# commit-msg – Validiert Commit Message Konventionen
+# Aktivierung: git config core.hooksPath .githooks
+# Referenz: copilot-instructions.md Abschnitt 2.7
+
+set -euo pipefail
+
+COMMIT_MSG_FILE="$1"
+
+if [ ! -f "$COMMIT_MSG_FILE" ]; then
+    echo "[commit-msg] ERROR: Commit Message Datei nicht gefunden: $COMMIT_MSG_FILE" >&2
+    exit 1
+fi
+
+if [ -x scripts/common/check-commit-msg.sh ]; then
+    bash scripts/common/check-commit-msg.sh --file "$COMMIT_MSG_FILE" || exit 1
+else
+    echo "[commit-msg] WARNING: scripts/common/check-commit-msg.sh nicht gefunden – überspringe Validierung"
+fi
+
+exit 0
