@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 
 	"github.com/Sternrassler/eve-sde/internal/schema/types"
 	sdeversion "github.com/Sternrassler/eve-sde/internal/sde/version"
@@ -164,6 +165,16 @@ func main() {
 		}
 
 		log.Printf("✓ Imported %s", mapping.Name)
+	}
+
+	// Initialize navigation views if we imported map data
+	if *importTable == "" || strings.HasPrefix(*importTable, "map") {
+		log.Println("Initializing navigation views...")
+		if err := imp.InitializeNavigationViews(); err != nil {
+			log.Printf("Warning: Failed to initialize navigation views: %v", err)
+		} else {
+			log.Println("✓ Navigation views initialized")
+		}
 	}
 
 	log.Println("✓ Import completed successfully")
