@@ -35,6 +35,13 @@ go run examples/navigation_example.go
 
 **Features:**
 
+- Dijkstra Pathfinding (11,500 Stargates, 5,700 Systeme)
+- Travel Time Berechnung mit Schiffs-Parametern
+- Security Filtering (High-Sec only Routes)
+- Trade Hub Analysis (Jita, Amarr, Dodixie, Rens, Hek)
+
+Details: [docs/navigation.md](docs/navigation.md)
+
 ### Cargo & Hauling API (NEU in v0.2.0)
 
 Vollständiges Cargo-Berechnungssystem für Hauling und Trade:
@@ -46,6 +53,7 @@ Vollständiges Cargo-Berechnungssystem für Hauling und Trade:
 - **Route Security**: System-Security-Analyse für sichere Routen
 
 **Beispiel:**
+
 ```bash
 # Basis-Berechnung (ohne Skills)
 go run examples/cargo_calculator.go --ship 648 --item 34
@@ -58,6 +66,7 @@ go run examples/cargo_calculator.go --ship 648 --ship-info
 ```
 
 **Go API:**
+
 ```go
 import "github.com/Sternrassler/eve-sde/pkg/evedb/cargo"
 
@@ -73,53 +82,6 @@ fmt.Printf("Effective: %.0f m³ (+%.0f%%)\n",
 
 Siehe [docs/cargo-api.md](docs/cargo-api.md) für vollständige API-Dokumentation.
 
-## Struktur
-
-```text
-eve-sde/
-├── cmd/
-│   ├── sde-schema-gen/      # Schema-Generator CLI
-│   ├── sde-to-sqlite/       # SQLite-Import CLI (DB-Core)
-│   └── sde-sync/            # Sync-Pipeline Orchestrator
-├── internal/                # DB-Core (nicht für externe Nutzung)
-│   ├── schema/
-│   │   └── types/           # 53 generierte Go-Structs
-│   ├── sqlite/
-│   │   ├── schema/          # DDL-Generator
-│   │   ├── importer/        # JSONL→SQLite Importer
-│   │   └── views/           # SQL Views (Navigation, Trade Hubs)
-│   └── sde/
-│       └── version/         # Version Tracking
-├── pkg/                     # API Layer (externe Go-APIs, optional)
-│   └── evedb/
-│       ├── navigation/      # Navigation & Route Planning API
-│       └── cargo/           # Cargo & Hauling Calculations API
-├── data/                    # Lokale SDE-Kopien (gitignored)
-│   ├── jsonl/               # 52 JSONL-Dateien (~499 MB)
-│   ├── yaml/                # 52 YAML-Dateien (~160 MB)
-│   └── sqlite/              # eve-sde.db (~405 MB)
-├── examples/                # Beispiel-Programme (API-Nutzung)
-│   ├── navigation_example.go
-│   └── cargo_calculator.go
-├── scripts/                 # Sync-, Transform- und Validierungslogik
-├── docs/
-│   ├── adr/                 # Architekturentscheidungen (ADRs)
-│   ├── sqlite-implementation.md  # SQLite-Dokumentation
-│   ├── navigation.md        # Navigation System Dokumentation
-│   └── cargo-api.md         # Cargo & Hauling API Dokumentation
-└── .github/copilot-instructions.md  # Engineering-Richtlinien
-```
-
-## Getting Started
-- Dijkstra Pathfinding (11,500 Stargates, 5,700 Systeme)
-- Travel Time Berechnung mit Schiffs-Parametern
-- Security Filtering (High-Sec only Routes)
-- Trade Hub Analysis (Jita, Amarr, Dodixie, Rens, Hek)
-
-Details: [docs/navigation.md](docs/navigation.md)
-
-Details: [docs/navigation.md](docs/navigation.md)
-
 ## Architektur
 
 **DB-First Philosophy:** SQLite-Datenbank ist primäres Produkt, Go-Code ist Build-Tool.
@@ -133,21 +95,23 @@ eve-sde/
 │   ├── sqlite/
 │   │   ├── schema/          # DDL Generator
 │   │   ├── importer/        # JSONL Streaming Importer
-│   │   └── views/           # SQL Views (Navigation, Stats)
+│   │   └── views/           # SQL Views (Navigation, Cargo, Stats)
 │   └── schema/types/        # 53 Go Structs (generiert)
 ├── pkg/evedb/               # Optional: Go APIs
-│   └── navigation/          # Navigation API (Pathfinding, Travel Time)
+│   ├── navigation/          # Navigation API (Pathfinding, Travel Time)
+│   └── cargo/               # Cargo API (Hauling, Capacity Calculations)
 ├── data/                    # Lokale Daten (gitignored)
 │   └── sqlite/eve-sde.db    # **HAUPTPRODUKT**
 └── docs/                    # Technische Dokumentation
     ├── adr/                 # Architektur-Entscheidungen
-    └── navigation.md        # Navigation System Docs
+    ├── navigation.md        # Navigation System Docs
+    └── cargo-api.md         # Cargo & Hauling API Docs
 ```
 
 **Nutzung:**
 
 - **Direkt:** SQLite-DB via `sqlite3` CLI oder Bibliotheken (Python, Node.js, etc.)
-- **Go API:** Optional via `pkg/evedb/navigation` (Convenience Layer)
+- **Go API:** Optional via `pkg/evedb/navigation` oder `pkg/evedb/cargo` (Convenience Layer)
 
 Details: [docs/adr/ADR-001-db-core-api-separation.md](docs/adr/ADR-001-db-core-api-separation.md)
 
@@ -180,12 +144,13 @@ ls -lh data/sqlite/eve-sde.db  # 405 MB
 - `mapStargates` (11.5k) - Stargate-Verbindungen
 - `groups`, `categories`, `regions`, `constellations`, ...
 
-**5 SQL Views:**
+**7 SQL Views:**
 
 - `v_stargate_graph` - Pathfinding Graph
 - `v_system_info` - System-Metadaten
+- `v_item_volumes`, `v_ship_cargo_capacities` - Cargo Calculations
 - `v_trade_hubs` - Major Trade Hubs (Jita, Amarr, etc.)
-- `v_region_stats`, `v_system_security_zones`
+- `v_region_stats`, `v_system_security_zones` - Region Intelligence
 
 ```sql
 -- Beispiel: Tritanium Details
