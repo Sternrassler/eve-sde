@@ -5,7 +5,7 @@ Dieses Dokument beschreibt die Navigation- und Intelligence-Features für EVE On
 ## Überblick
 
 Das Navigation-System bietet:
-- **Pathfinding**: Kürzeste Routen zwischen Systemen (Dijkstra via SQLite Recursive CTE)
+- **Pathfinding**: Kürzeste Routen zwischen Systemen (Go-basierter Dijkstra-Algorithmus)
 - **Travel Time Calculation**: Reisezeit-Berechnung mit Schiffs-Parametern
 - **Security Filtering**: Vermeidung von Low-Sec/Null-Sec Systemen
 - **Trade Hub Analysis**: Distanz zu Major Trade Hubs
@@ -318,53 +318,22 @@ time_per_jump = align_time + warp_time + gate_jump_delay
 
 ## SQL Examples
 
-### Shortest Path (Pure SQL)
+### Graph Query (Direct)
 
 ```sql
--- Find shortest route from Jita (30000142) to Amarr (30002187)
-WITH RECURSIVE path AS (
-    SELECT 
-        from_system_id,
-        to_system_id,
-        1 AS jumps,
-        json_array(from_system_id, to_system_id) AS route
-    FROM v_stargate_graph
-    WHERE from_system_id = 30000142
-    
-    UNION ALL
-    
-    SELECT 
-        p.from_system_id,
-        g.to_system_id,
-        p.jumps + 1,
-        json_insert(p.route, '$[#]', g.to_system_id)
-    FROM path p
-    JOIN v_stargate_graph g ON p.to_system_id = g.from_system_id
-    LEFT JOIN mapSolarSystems sys ON g.to_system_id = sys._key
-    WHERE p.jumps < 100
-        AND NOT EXISTS (
-            SELECT 1 FROM json_each(p.route) WHERE value = g.to_system_id
-        )
-)
-SELECT from_system_id, to_system_id, jumps, route
-FROM path 
-WHERE to_system_id = 30002187
-ORDER BY jumps ASC
-LIMIT 1;
+-- Query the stargate graph directly
+SELECT from_system_id, to_system_id, gate_id
+FROM v_stargate_graph
+WHERE from_system_id = 30000142
+LIMIT 10;
 ```
 
-### High-Sec Only Route
+**Note**: Pathfinding is now implemented in Go (Dijkstra algorithm) for optimal performance. 
+The Go API automatically loads the graph from `v_stargate_graph` and uses an efficient 
+in-memory algorithm that provides sub-millisecond pathfinding even for long routes (40+ jumps).
 
-```sql
--- Same as above, but add security filter
-WITH RECURSIVE path AS (
-    ...
-    WHERE p.jumps < 100
-        AND NOT EXISTS (...)
-        AND sys.securityStatus >= 0.45  -- High-Sec only
-)
-...
-```
+The previous recursive CTE approach has been replaced for better performance - from >5 minutes 
+to <1ms for long-distance routes.
 
 ### Region Analysis
 
@@ -399,9 +368,16 @@ LIMIT 20;
 ## Performance
 
 ### Pathfinding
-- **Typical Route (40 jumps)**: < 100ms
-- **Long Route (100 jumps)**: < 500ms
-- **Recursion Limit**: 100 jumps (adjustable in query)
+- **Short Routes (<10 jumps)**: < 0.02ms (17μs)
+- **Medium Routes (~30 jumps)**: < 0.2ms (170μs)
+- **Long Routes (40-50 jumps)**: < 0.3ms (275μs)
+- **Algorithm**: Go-based Dijkstra with in-memory graph (O(E + V log V))
+
+### Implementation
+- Graph loaded from `v_stargate_graph` view (~40k edges)
+- Early termination when goal is reached
+- Memory-efficient path reconstruction
+- Security filtering applied during graph load
 
 ### Views
 - **v_stargate_graph**: ~40k bidirectional edges (instant)
