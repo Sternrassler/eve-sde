@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Cargo & Hauling Calculation API** (`pkg/evedb/cargo/`)
+  - Go API für Cargo-Berechnungen, Item-Volumen, Schiffs-Kapazitäten
+  - SQL Views: `v_item_volumes`, `v_ship_cargo_capacities`, `v_route_security_analysis`
+  - Skill-System: Racial Hauler, Freighter, Mining Barge Skills (optionale Parameter)
+  - Funktionen: `GetItemVolume()`, `GetShipCapacities()`, `CalculateCargoFit()`
+  - Skill-Modifikatoren: +5% pro Level, kombinierbar
+  - Test Coverage: 93.1%
+  - Beispiel-Programm: `examples/cargo_calculator.go`
+  - Dokumentation: `docs/cargo-api.md`
+
 - **Navigation & Intelligence System** (`pkg/evedb/navigation/`)
   - Go API für Pathfinding, Travel Time Berechnung, Security Filtering
   - SQL Views: `v_stargate_graph`, `v_system_info`, `v_system_security_zones`, `v_region_stats`, `v_trade_hubs`
