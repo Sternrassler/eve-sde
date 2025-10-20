@@ -33,7 +33,7 @@ WHERE json_extract(s.destination, '$.solarSystemID') IS NOT NULL;
 CREATE VIEW IF NOT EXISTS v_system_info AS
 SELECT 
     sys._key as system_id,
-    sys.solarSystemID as solar_system_id,
+    sys._key as solar_system_id,  -- _key IS the solar system ID
     COALESCE(json_extract(sys.name, '$.en'), json_extract(sys.name, '$.de')) as system_name,
     sys.securityStatus as security_status,
     CASE 
