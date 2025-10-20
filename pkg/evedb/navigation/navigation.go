@@ -7,7 +7,6 @@ package navigation
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"math"
 )
@@ -117,69 +116,159 @@ func getEffectiveParams(params *NavigationParams) (warpSpeed, alignTime, avgWarp
 	return
 }
 
-// ShortestPath finds the shortest path between two systems using recursive CTE
-func ShortestPath(db *sql.DB, fromSystemID, toSystemID int64, avoidLowSec bool) (*PathResult, error) {
-	query := `
-		WITH RECURSIVE path AS (
-			SELECT 
-				from_system_id,
-				to_system_id,
-				1 AS jumps,
-				json_array(from_system_id, to_system_id) AS route
-			FROM v_stargate_graph
-			WHERE from_system_id = ?
-			
-			UNION ALL
-			
-			SELECT 
-				p.from_system_id,
-				g.to_system_id,
-				p.jumps + 1,
-				json_insert(p.route, '$[#]', g.to_system_id)
-			FROM path p
-			JOIN v_stargate_graph g ON p.to_system_id = g.from_system_id
-			LEFT JOIN mapSolarSystems sys ON g.to_system_id = sys._key
-			WHERE p.jumps < 100
-				AND NOT EXISTS (
-					SELECT 1 FROM json_each(p.route) WHERE value = g.to_system_id
-				)
-				AND (? = 0 OR sys.securityStatus >= 0.45)
-		)
-		SELECT from_system_id, to_system_id, jumps, route
-		FROM path 
-		WHERE to_system_id = ? 
-		ORDER BY jumps ASC
-		LIMIT 1
-	`
+// edge represents a stargate connection
+type edge struct {
+	toSystemID int64
+}
 
-	avoidLowSecInt := 0
-	if avoidLowSec {
-		avoidLowSecInt = 1
+// ShortestPath finds the shortest path between two systems using Dijkstra's algorithm
+// This implementation loads the graph into memory and uses a Go-based algorithm
+// for better performance on long-distance routes (40+ jumps)
+func ShortestPath(db *sql.DB, fromSystemID, toSystemID int64, avoidLowSec bool) (*PathResult, error) {
+	// Load the graph from database
+	graph, err := loadGraph(db, avoidLowSec)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load graph: %w", err)
 	}
 
-	var result PathResult
-	var routeJSON string
-
-	err := db.QueryRow(query, fromSystemID, avoidLowSecInt, toSystemID).Scan(
-		&result.FromSystemID,
-		&result.ToSystemID,
-		&result.Jumps,
-		&routeJSON,
-	)
-
-	if err == sql.ErrNoRows {
+	// Run Dijkstra's algorithm
+	path, found := dijkstra(graph, fromSystemID, toSystemID)
+	if !found {
 		return nil, fmt.Errorf("no path found between systems %d and %d", fromSystemID, toSystemID)
 	}
+
+	result := &PathResult{
+		FromSystemID: fromSystemID,
+		ToSystemID:   toSystemID,
+		Jumps:        len(path) - 1, // jumps = number of systems - 1
+		Route:        path,
+	}
+
+	return result, nil
+}
+
+// loadGraph loads the stargate graph from the database
+func loadGraph(db *sql.DB, avoidLowSec bool) (map[int64][]edge, error) {
+	var query string
+	if avoidLowSec {
+		query = `
+			SELECT DISTINCT g.from_system_id, g.to_system_id
+			FROM v_stargate_graph g
+			LEFT JOIN mapSolarSystems sys ON g.to_system_id = sys._key
+			WHERE sys.securityStatus >= 0.45 OR sys.securityStatus IS NULL
+		`
+	} else {
+		query = `
+			SELECT from_system_id, to_system_id
+			FROM v_stargate_graph
+		`
+	}
+
+	rows, err := db.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to find path: %w", err)
+		return nil, fmt.Errorf("failed to query graph: %w", err)
+	}
+	defer rows.Close()
+
+	graph := make(map[int64][]edge)
+	for rows.Next() {
+		var from, to int64
+		if err := rows.Scan(&from, &to); err != nil {
+			return nil, fmt.Errorf("failed to scan edge: %w", err)
+		}
+		graph[from] = append(graph[from], edge{toSystemID: to})
 	}
 
-	// Parse route JSON
-	if err := json.Unmarshal([]byte(routeJSON), &result.Route); err != nil {
-		return nil, fmt.Errorf("failed to parse route JSON: %w", err)
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating graph: %w", err)
 	}
 
-	return &result, nil
+	return graph, nil
+}
+
+// dijkstra implements Dijkstra's shortest path algorithm
+func dijkstra(graph map[int64][]edge, start, goal int64) ([]int64, bool) {
+	// Check if start and goal exist in graph
+	if _, exists := graph[start]; !exists {
+		return nil, false
+	}
+
+	// Distance map: system -> distance from start
+	dist := make(map[int64]int)
+	dist[start] = 0
+
+	// Previous node map for path reconstruction
+	prev := make(map[int64]int64)
+
+	// Visited set
+	visited := make(map[int64]bool)
+
+	// Priority queue (using simple slice for now, can optimize with heap)
+	// Each element is [systemID, distance]
+	pq := []struct {
+		systemID int64
+		distance int
+	}{{start, 0}}
+
+	for len(pq) > 0 {
+		// Find minimum distance node (linear search for simplicity)
+		minIdx := 0
+		for i := 1; i < len(pq); i++ {
+			if pq[i].distance < pq[minIdx].distance {
+				minIdx = i
+			}
+		}
+
+		// Extract minimum
+		current := pq[minIdx]
+		pq = append(pq[:minIdx], pq[minIdx+1:]...)
+
+		// Skip if already visited
+		if visited[current.systemID] {
+			continue
+		}
+
+		// Mark as visited
+		visited[current.systemID] = true
+
+		// Early termination: if we reached the goal, reconstruct path
+		if current.systemID == goal {
+			return reconstructPath(prev, start, goal), true
+		}
+
+		// Explore neighbors
+		for _, e := range graph[current.systemID] {
+			if visited[e.toSystemID] {
+				continue
+			}
+
+			newDist := current.distance + 1
+			if oldDist, exists := dist[e.toSystemID]; !exists || newDist < oldDist {
+				dist[e.toSystemID] = newDist
+				prev[e.toSystemID] = current.systemID
+				pq = append(pq, struct {
+					systemID int64
+					distance int
+				}{e.toSystemID, newDist})
+			}
+		}
+	}
+
+	// No path found
+	return nil, false
+}
+
+// reconstructPath builds the path from start to goal using the prev map
+func reconstructPath(prev map[int64]int64, start, goal int64) []int64 {
+	path := []int64{goal}
+	current := goal
+
+	for current != start {
+		current = prev[current]
+		path = append([]int64{current}, path...)
+	}
+
+	return path
 }
 
 // CalculateTravelTime calculates total travel time for a route with optional ship parameters
