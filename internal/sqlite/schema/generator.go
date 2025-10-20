@@ -43,7 +43,7 @@ func (g *Generator) GenerateTable(tableName string, structType reflect.Type) (st
 		isRequired := !containsOmitEmpty(parts)
 
 		// SQL Typ ermitteln
-		sqlType, err := g.goTypeToSQL(field.Type, field.Name)
+		sqlType, err := g.goTypeToSQL(field.Type)
 		if err != nil {
 			return "", fmt.Errorf("field %s: %w", field.Name, err)
 		}
@@ -70,7 +70,7 @@ func (g *Generator) GenerateTable(tableName string, structType reflect.Type) (st
 }
 
 // goTypeToSQL konvertiert Go-Typ zu SQLite-Typ
-func (g *Generator) goTypeToSQL(t reflect.Type, fieldName string) (string, error) {
+func (g *Generator) goTypeToSQL(t reflect.Type) (string, error) {
 	// Handle pointer types
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()

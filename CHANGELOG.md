@@ -13,25 +13,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **SQLite Database Implementation** (Complete Pipeline)
   - Reflection-based schema generator (`internal/sqlite/schema`)
-    * `GenerateTable()`: Go struct → CREATE TABLE DDL
-    * Type mapping: int64→INTEGER, float64→REAL, bool→INTEGER, LocalizedText→TEXT (JSON)
-    * Primary key detection on `_key` fields
-    * Required field detection via `omitempty` tag
-    * Field validation for indices (skip non-existent fields)
+    - `GenerateTable()`: Go struct → CREATE TABLE DDL
+    - Type mapping: int64→INTEGER, float64→REAL, bool→INTEGER, LocalizedText→TEXT (JSON)
+    - Primary key detection on `_key` fields
+    - Required field detection via `omitempty` tag
+    - Field validation for indices (skip non-existent fields)
   - Streaming JSONL importer (`internal/sqlite/importer`)
-    * `ImportJSONL()`: Streams JSONL with `bufio.Scanner`
-    * Batch inserts (1000 rows per batch)
-    * Single transaction per file
-    * SQLite PRAGMAs: WAL mode, NORMAL sync, cache_size=10000
-    * Type conversion: bool→int, complex types→JSON
+    - `ImportJSONL()`: Streams JSONL with `bufio.Scanner`
+    - Batch inserts (1000 rows per batch)
+    - Single transaction per file
+    - SQLite PRAGMAs: WAL mode, NORMAL sync, cache_size=10000
+    - Type conversion: bool→int, complex types→JSON
   - CLI Tool: `cmd/sde-to-sqlite`
-    * Flags: `--db`, `--jsonl`, `--init`, `--import`
-    * 41 schema mappings with index specifications
-    * Full import: 24s for 500k rows, 405 MB database
+    - Flags: `--db`, `--jsonl`, `--init`, `--import`
+    - 41 schema mappings with index specifications
+    - Full import: 24s for 500k rows, 405 MB database
   - Performance metrics:
-    * types table: 50,486 rows in 4s (12.6k rows/sec)
-    * mapMoons: 342,170 rows in 13s (26k rows/sec)
-    * Compression: 499 MB JSONL → 405 MB SQLite (18% reduction)
+    - types table: 50,486 rows in 4s (12.6k rows/sec)
+    - mapMoons: 342,170 rows in 13s (26k rows/sec)
+    - Compression: 499 MB JSONL → 405 MB SQLite (18% reduction)
   - Validation: All row counts match JSONL exactly, LocalizedText stored as JSON
   - Documentation: `docs/sqlite-implementation.md` with architecture & metrics
   - Dependencies: Added `github.com/mattn/go-sqlite3` v1.14.32

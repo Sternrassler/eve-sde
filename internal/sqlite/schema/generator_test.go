@@ -51,7 +51,7 @@ func TestGoTypeToSQL(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		result, err := gen.goTypeToSQL(tt.goType, "test")
+		result, err := gen.goTypeToSQL(tt.goType)
 		if err != nil {
 			t.Errorf("goTypeToSQL(%v) failed: %v", tt.goType, err)
 			continue
