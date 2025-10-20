@@ -9,11 +9,12 @@ import (
 	"reflect"
 
 	"github.com/Sternrassler/eve-sde/internal/schema/types"
+	sdeversion "github.com/Sternrassler/eve-sde/internal/sde/version"
 	"github.com/Sternrassler/eve-sde/internal/sqlite/importer"
 	"github.com/Sternrassler/eve-sde/internal/sqlite/schema"
 )
 
-const version = "0.1.0"
+const appVersion = "0.1.0"
 
 // SchemaMapping definiert Mapping zwischen JSONL und Go-Typen
 type SchemaMapping struct {
@@ -70,20 +71,56 @@ var schemaMappings = []SchemaMapping{
 func main() {
 	// Flags
 	var (
-		dbPath      = flag.String("db", "data/sqlite/eve-sde.db", "SQLite database path")
-		jsonlDir    = flag.String("jsonl", "data/jsonl", "JSONL input directory")
-		initOnly    = flag.Bool("init", false, "Initialize database schema only")
-		importTable = flag.String("import", "", "Import specific table (empty = all)")
-		showVersion = flag.Bool("version", false, "Show version")
+		dbPath        = flag.String("db", "data/sqlite/eve-sde.db", "SQLite database path")
+		jsonlDir      = flag.String("jsonl", "data/jsonl", "JSONL input directory")
+		initOnly      = flag.Bool("init", false, "Initialize database schema only")
+		importTable   = flag.String("import", "", "Import specific table (empty = all)")
+		showVersion   = flag.Bool("version", false, "Show version")
+		checkVersion  = flag.Bool("check-version", false, "Check for SDE updates and exit")
+		skipIfCurrent = flag.Bool("skip-if-current", false, "Skip import if database is up-to-date")
 	)
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Printf("sde-to-sqlite v%s\n", version)
+		fmt.Printf("sde-to-sqlite v%s\n", appVersion)
 		return
 	}
 
-	log.Printf("EVE SDE to SQLite Converter v%s", version)
+	log.Printf("EVE SDE to SQLite Converter v%s", appVersion)
+
+	// Version Check
+	if *checkVersion || *skipIfCurrent {
+		needsUpdate, latest, local, err := sdeversion.NeedsUpdate(*dbPath)
+		if err != nil {
+			log.Printf("Warning: Version check failed: %v", err)
+			if *checkVersion {
+				os.Exit(1)
+			}
+			// Bei skip-if-current fortfahren trotz Fehler
+		} else {
+			log.Printf("Latest SDE: %s", latest)
+			log.Printf("Local DB:   %s", local)
+
+			if *checkVersion {
+				if needsUpdate {
+					log.Println("✓ Update available")
+					os.Exit(0)
+				} else {
+					log.Println("✓ Database is up-to-date")
+					os.Exit(0)
+				}
+			}
+
+			if *skipIfCurrent && !needsUpdate {
+				log.Println("✓ Database is up-to-date, skipping import")
+				return
+			}
+
+			if needsUpdate {
+				log.Println("→ Update available, proceeding with import")
+			}
+		}
+	}
 
 	// Erstelle DB-Verzeichnis
 	if err := os.MkdirAll(filepath.Dir(*dbPath), 0755); err != nil {

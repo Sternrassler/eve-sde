@@ -42,7 +42,21 @@ go run ./cmd/sde-to-sqlite --init
 - `--jsonl DIR`: JSONL-Input-Verzeichnis (default: `data/jsonl`)
 - `--init`: Nur Schema erstellen, keine Daten importieren
 - `--import TABLE`: Nur spezifische Tabelle importieren (default: alle)
+- `--check-version`: Prüft auf SDE-Updates (vergleicht mit https://developers.eveonline.com)
+- `--skip-if-current`: Überspringt Import wenn Datenbank aktuell ist
 - `--version`: Version anzeigen
+
+### Version Tracking
+
+Automatische Versionsprüfung gegen CCP's offizielle SDE-API:
+
+```bash
+# Nur Version prüfen
+go run ./cmd/sde-to-sqlite --check-version
+
+# Import nur bei neuer Version
+go run ./cmd/sde-to-sqlite --skip-if-current
+```
 
 ## Performance
 
