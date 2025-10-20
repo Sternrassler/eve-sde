@@ -5,6 +5,7 @@ Dieses Dokument beschreibt die Navigation- und Intelligence-Features für EVE On
 ## Überblick
 
 Das Navigation-System bietet:
+
 - **Pathfinding**: Kürzeste Routen zwischen Systemen (Go-basierter Dijkstra-Algorithmus)
 - **Travel Time Calculation**: Reisezeit-Berechnung mit Schiffs-Parametern
 - **Security Filtering**: Vermeidung von Low-Sec/Null-Sec Systemen
@@ -13,10 +14,11 @@ Das Navigation-System bietet:
 
 ## SQL Views
 
-> **Hinweis**: Alle Views werden automatisch bei jedem DB-Import neu erstellt via `sde-to-sqlite`. 
+> **Hinweis**: Alle Views werden automatisch bei jedem DB-Import neu erstellt via `sde-to-sqlite`.
 > Siehe [Persistence & Recreation](#view-persistence) am Ende dieses Dokuments.
 
 ### v_stargate_graph
+
 Bidirektionaler Stargate-Connectivity-Graph für Pathfinding.
 
 ```sql
@@ -24,12 +26,14 @@ SELECT * FROM v_stargate_graph LIMIT 5;
 ```
 
 **Columns:**
+
 - `from_system_id`: Quellsystem ID
 - `to_system_id`: Zielsystem ID
 - `gate_id`: Stargate ID
 - `gate_type_id`: Stargate Typ ID
 
 ### v_system_info
+
 Enhanced System-Information mit parsed Namen und Security-Zonen.
 
 ```sql
@@ -37,6 +41,7 @@ SELECT * FROM v_system_info WHERE system_name LIKE 'Jita%';
 ```
 
 **Columns:**
+
 - `system_id`: System ID (primary key)
 - `solar_system_id`: Solar System ID
 - `system_name`: Name (Englisch, Deutsch als Fallback)
@@ -50,6 +55,7 @@ SELECT * FROM v_system_info WHERE system_name LIKE 'Jita%';
 - `wormhole_class_id`: Wormhole Class (NULL für K-Space)
 
 ### v_system_security_zones
+
 Security-Zonen-Statistiken pro Region.
 
 ```sql
@@ -58,6 +64,7 @@ WHERE region_name = 'The Forge';
 ```
 
 **Columns:**
+
 - `region_id`: Region ID
 - `region_name`: Region Name
 - `security_zone`: Security Zone
@@ -65,6 +72,7 @@ WHERE region_name = 'The Forge';
 - `avg_security`: Durchschnittliche Security
 
 ### v_region_stats
+
 Comprehensive Region-Statistiken.
 
 ```sql
@@ -74,6 +82,7 @@ LIMIT 10;
 ```
 
 **Columns:**
+
 - `region_id`: Region ID
 - `region_name`: Region Name
 - `total_systems`: Gesamtzahl Systeme
@@ -82,6 +91,7 @@ LIMIT 10;
 - `high_sec_count`, `low_sec_count`, `null_sec_count`, `wormhole_count`: Counts
 
 ### v_trade_hubs
+
 Major Trade Hub Information.
 
 ```sql
@@ -89,6 +99,7 @@ SELECT * FROM v_trade_hubs;
 ```
 
 **Trade Hubs:**
+
 - **Jita** (30000142) - The Forge - Höchster Traffic
 - **Amarr** (30002187) - Domain
 - **Dodixie** (30002659) - Sinq Laison
@@ -98,6 +109,7 @@ SELECT * FROM v_trade_hubs;
 ## Go API
 
 **Architektur:** Die Navigation-API ist in zwei Ebenen getrennt:
+
 - **DB-Core** (`internal/sqlite/views`): SQL View Initialisierung
 - **API Layer** (`pkg/evedb/navigation`): Go-basierte Navigation-Funktionen
 
@@ -116,8 +128,9 @@ if err != nil {
     log.Fatal(err)
 }
 
-// Views müssen einmalig initialisiert werden
-if err := views.InitializeNavigationViews(db); err != nil {
+// Views werden automatisch bei DB-Import erstellt (sde-to-sqlite)
+// Nur erforderlich falls Views manuell neu erstellt werden sollen:
+if err := views.InitializeViews(db); err != nil {
     log.Fatal(err)
 }
 ```
@@ -136,12 +149,14 @@ fmt.Printf("Systems: %v\n", path.Route)
 ```
 
 **Parameters:**
+
 - `db`: SQLite database connection
 - `fromSystemID`: Source system ID
 - `toSystemID`: Destination system ID
 - `avoidLowSec`: Skip systems with security < 0.45
 
 **Returns:**
+
 ```go
 type PathResult struct {
     FromSystemID int64   `json:"from_system_id"`
@@ -237,6 +252,7 @@ type NavigationParams struct {
 ```
 
 **Defaults:**
+
 - **Warp Speed**: 3.0 AU/s (Cruiser average)
 - **Align Time**: 6.0 seconds (medium ships)
 - **Gate Jump**: 10.0 seconds (animation + loading)
@@ -257,19 +273,20 @@ type NavigationParams struct {
 
 ### Align Time (Exact)
 
-```
+```text
 align_time = -ln(0.25) * inertia_modifier * mass / 500000
            ≈ 1.386 * inertia_modifier * mass / 500000
 ```
 
 **Go Implementation:**
+
 ```go
 alignTime := navigation.CalculateAlignTime(mass, inertiaModifier)
 ```
 
 ### Warp Time (CCP 3-Phase)
 
-```
+```text
 k = warp_speed (AU/s)
 j = min(k/3, 2)
 AU = 149,597,870,700 meters
@@ -289,25 +306,27 @@ t_total = t_accel + t_cruise + t_decel
 ```
 
 **Go Implementation:**
+
 ```go
 warpTime := navigation.CalculateWarpTime(distanceAU, warpSpeedAU)
 ```
 
 ### Warp Time (Simplified)
 
-```
+```text
 time_warp = (distance_AU / warp_speed) * correction_factor
           = (distance_AU / warp_speed) * 1.4
 ```
 
 **Go Implementation:**
+
 ```go
 warpTime := navigation.CalculateSimplifiedWarpTime(distanceAU, warpSpeedAU)
 ```
 
 ### Total Jump Time
 
-```
+```text
 time_per_jump = align_time + warp_time + gate_jump_delay
               = align_time + (avg_warp_distance / warp_speed) * 1.4 + 10s
 
@@ -328,11 +347,11 @@ WHERE from_system_id = 30000142
 LIMIT 10;
 ```
 
-**Note**: Pathfinding is now implemented in Go (Dijkstra algorithm) for optimal performance. 
-The Go API automatically loads the graph from `v_stargate_graph` and uses an efficient 
+**Note**: Pathfinding is now implemented in Go (Dijkstra algorithm) for optimal performance.
+The Go API automatically loads the graph from `v_stargate_graph` and uses an efficient
 in-memory algorithm that provides sub-millisecond pathfinding even for long routes (40+ jumps).
 
-The previous recursive CTE approach has been replaced for better performance - from >5 minutes 
+The previous recursive CTE approach has been replaced for better performance - from >5 minutes
 to <1ms for long-distance routes.
 
 ### Region Analysis
@@ -367,22 +386,29 @@ LIMIT 20;
 
 ## Performance
 
-### Pathfinding
-- **Short Routes (<10 jumps)**: < 0.02ms (17μs)
-- **Medium Routes (~30 jumps)**: < 0.2ms (170μs)
-- **Long Routes (40-50 jumps)**: < 0.3ms (275μs)
-- **Algorithm**: Go-based Dijkstra with in-memory graph (O(E + V log V))
+### Pathfinding (Go Dijkstra)
 
-### Implementation
-- Graph loaded from `v_stargate_graph` view (~40k edges)
-- Early termination when goal is reached
-- Memory-efficient path reconstruction
-- Security filtering applied during graph load
+- **Short Routes (9 jumps)**: 17 µs (0.017 ms)
+- **Medium Routes (28 jumps)**: 169 µs (0.169 ms)
+- **Long Routes (40 jumps)**: 273 µs (0.273 ms)
+- **Algorithm**: Go-based Dijkstra with in-memory adjacency list
+- **Complexity**: O(E + V log V) mit priority queue
+- **Improvement**: ~300,000x faster als vorherige SQL Recursive CTE (war >5min für 40 jumps)
 
-### Views
-- **v_stargate_graph**: ~40k bidirectional edges (instant)
-- **v_system_info**: ~8k systems (instant)
+### Implementation Details
+
+- Graph wird einmalig aus `v_stargate_graph` geladen (~11,500 edges)
+- Early termination sobald Ziel erreicht
+- Memory-efficient path reconstruction via parent map
+- Security filtering (AvoidLowSec) direkt beim Graph-Bau
+- In-Memory Adjacency List (`map[int64][]Edge`)
+
+### Views (SQL)
+
+- **v_stargate_graph**: ~11,500 bidirektionale Edges (instant)
+- **v_system_info**: ~5,700 systems (instant)
 - **v_region_stats**: ~100 regions (instant)
+- **v_trade_hubs**: 5 major hubs (instant)
 
 ## Testing
 
@@ -406,12 +432,14 @@ go test ./internal/sqlite/navigation -bench=.
 ## Limitations
 
 ### Current Implementation
+
 - No Jump Bridges / Ansiblex Gates (player-owned)
 - No Wormhole connections (dynamic)
 - No Pochven / Filament jumps (special mechanics)
 - Static stargate data only (no real-time changes)
 
 ### Future Enhancements
+
 - Choke Point Detection (single-gate bottlenecks)
 - Risk Scoring (zkillboard API integration)
 - Capital Jump Range Calculations (cynos)
@@ -426,26 +454,29 @@ go test ./internal/sqlite/navigation -bench=.
 Navigation-Views sind **nicht manuell zu pflegen**. Sie werden automatisch neu erstellt:
 
 1. **Bei jedem `sde-to-sqlite` Import**:
-   - `InitializeNavigationViews()` wird nach map data import aufgerufen
-   - `views.sql` nutzt `CREATE VIEW IF NOT EXISTS` (idempotent)
+   - `views.InitializeViews()` wird nach map data import aufgerufen
+   - SQL-Dateien in `internal/sqlite/views/` nutzen `CREATE VIEW IF NOT EXISTS` (idempotent)
+   - Alle Views werden automatisch angelegt
 
 2. **GitHub Actions Workflow** (`sync-sde-release.yml`):
    - Täglicher Cron-Job prüft auf neue SDE-Versionen
    - `make sync-force` löscht alte DB und importiert neu
-   - Views werden automatisch mit recreated → **kein manueller Eingriff nötig**
+   - Views werden automatisch recreated → **kein manueller Eingriff nötig**
 
 3. **Lokale Entwicklung**:
+
    ```bash
    # Views manuell neu erstellen (falls nötig)
-   sqlite3 data/sqlite/eve-sde.db < internal/sqlite/navigation/views.sql
+   sqlite3 data/sqlite/eve-sde.db < internal/sqlite/views/navigation.sql
    
-   # Oder: Force-Import
+   # Oder: Vollständiger Force-Import
    make sync-force
    ```
 
 ### Zukünftige Custom Functions (Hinweis für Entwickler)
 
 Falls später **Go-basierte SQLite Functions** (via `RegisterFunc`) hinzugefügt werden:
+
 - **Limitation**: Go Functions sind runtime-only, nicht in DB gespeichert
 - **Lösung**: Functions müssen bei jedem DB-Open registriert werden
 - **Pattern**: `navigation.RegisterFunctions(db)` beim Öffnen aufrufen
@@ -454,8 +485,8 @@ Falls später **Go-basierte SQLite Functions** (via `RegisterFunc`) hinzugefügt
 
 ## References
 
-- **EVE Uni Wiki - Warp Time**: https://wiki.eveuniversity.org/Warp_time_calculation
-- **EVE Uni Wiki - Stargates**: https://wiki.eveuniversity.org/Stargates
-- **CCP Warp Drive Active**: https://www.eveonline.com/news/view/warp-drive-active
-- **SQLite Recursive CTE**: https://www.sqlite.org/lang_with.html
-- **SQLite JSON Functions**: https://www.sqlite.org/json1.html
+- **EVE Uni Wiki - Warp Time**: <https://wiki.eveuniversity.org/Warp_time_calculation>
+- **EVE Uni Wiki - Stargates**: <https://wiki.eveuniversity.org/Stargates>
+- **CCP Warp Drive Active**: <https://www.eveonline.com/news/view/warp-drive-active>
+- **SQLite Recursive CTE**: <https://www.sqlite.org/lang_with.html>
+- **SQLite JSON Functions**: <https://www.sqlite.org/json1.html>
