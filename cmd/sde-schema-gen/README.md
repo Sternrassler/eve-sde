@@ -11,24 +11,24 @@ Go CLI tool to generate type-safe Go structs from EVE Online SDE JSONL files.
 - **Template-based**: Uses Go's text/template for clean code generation
 - **Nested structures**: Handles nesting with `map[string]interface{}` for maximum compatibility
 
-## Installation
+## Build
 
 ```bash
-go build -o bin/sde-schema-gen ./cmd/sde-schema-gen
+go build ./cmd/sde-schema-gen
 ```
 
 ## Usage
 
 ```bash
 # Generate schemas from JSONL data
-./bin/sde-schema-gen \
+go run ./cmd/sde-schema-gen \
   -input data/jsonl \
   -output internal/schema/types \
   -lines 100 \
   -v
 
 # Or via wrapper script
-./scripts/fetch-schemas.sh --refresh --verbose
+./scripts/fetch-schemas.sh --refresh -v
 ```
 
 ### Options
