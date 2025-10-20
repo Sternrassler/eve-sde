@@ -26,37 +26,9 @@ jobs:
       - name: Check for SDE Updates
         id: version_check
         run: |
-          # Version Check über internal/sde/version Package
-          cat > /tmp/version-check.go <<'EOF'
-          package main
-          import (
-            "fmt"
-            "os"
-            sdeversion "github.com/Sternrassler/eve-sde/internal/sde/version"
-          )
-          func main() {
-            latest, err := sdeversion.GetLatestVersion()
-            if err != nil {
-              fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-              os.Exit(1)
-            }
-            local, _ := sdeversion.GetLocalVersion("data/sqlite/eve-sde.db")
-            
-            fmt.Printf("LATEST_BUILD=%d\n", latest.BuildNumber)
-            fmt.Printf("LATEST_DATE=%s\n", latest.ReleaseDate.Format("2006-01-02"))
-            if local != nil {
-              fmt.Printf("LOCAL_BUILD=%d\n", local.BuildNumber)
-              fmt.Printf("NEEDS_UPDATE=%t\n", latest.BuildNumber != local.BuildNumber)
-            } else {
-              fmt.Printf("LOCAL_BUILD=0\n")
-              fmt.Printf("NEEDS_UPDATE=true\n")
-            }
-          }
-          EOF
-          
-          # Ausführen und Variablen setzen
+          # Version Check via cmd/sde-version-check
           mkdir -p data/sqlite
-          go run /tmp/version-check.go > /tmp/version-vars.env
+          go run ./cmd/sde-version-check > /tmp/version-vars.env
           
           # Variablen in GITHUB_OUTPUT schreiben
           source /tmp/version-vars.env
