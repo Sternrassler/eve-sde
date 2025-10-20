@@ -75,6 +75,44 @@ go run examples/navigation_example.go -safe
 
 Siehe [docs/navigation.md](docs/navigation.md) und [examples/README.md](examples/README.md) für Details.
 
+### Cargo & Hauling API (NEU in v0.2.0)
+
+Vollständiges Cargo-Berechnungssystem für Hauling und Trade:
+
+- **Item Volumes**: Volumen-Informationen und ISK/m³ Value-Density
+- **Ship Capacities**: Cargo-Holds (Cargo, Ore Hold, Fleet Hangar)
+- **Skill System**: Racial Hauler, Freighter, Mining Barge Skills (optional)
+- **Cargo Fit Calculation**: Wieviele Items passen in Schiff?
+- **Route Security**: System-Security-Analyse für sichere Routen
+
+**Beispiel:**
+```bash
+# Basis-Berechnung (ohne Skills)
+go run examples/cargo_calculator.go --ship 648 --item 34
+
+# Mit Gallente Hauler V (+25% Cargo)
+go run examples/cargo_calculator.go --ship 648 --item 34 --racial-hauler 5
+
+# Schiffs-Kapazitäten anzeigen
+go run examples/cargo_calculator.go --ship 648 --ship-info
+```
+
+**Go API:**
+```go
+import "github.com/Sternrassler/eve-sde/pkg/evedb/cargo"
+
+// Ohne Skills (Basis-Werte)
+result, _ := cargo.CalculateCargoFit(db, 648, 34, nil)
+// Mit Skills
+racialLevel := 5
+skills := &cargo.SkillModifiers{RacialHaulerLevel: &racialLevel}
+result, _ := cargo.CalculateCargoFit(db, 648, 34, skills)
+fmt.Printf("Effective: %.0f m³ (+%.0f%%)\n", 
+    result.EffectiveCapacity, result.SkillBonus)
+```
+
+Siehe [docs/cargo-api.md](docs/cargo-api.md) für vollständige API-Dokumentation.
+
 ## Struktur
 
 ```text
@@ -94,18 +132,21 @@ eve-sde/
 │       └── version/         # Version Tracking
 ├── pkg/                     # API Layer (externe Go-APIs, optional)
 │   └── evedb/
-│       └── navigation/      # Navigation & Route Planning API
+│       ├── navigation/      # Navigation & Route Planning API
+│       └── cargo/           # Cargo & Hauling Calculations API
 ├── data/                    # Lokale SDE-Kopien (gitignored)
 │   ├── jsonl/               # 52 JSONL-Dateien (~499 MB)
 │   ├── yaml/                # 52 YAML-Dateien (~160 MB)
 │   └── sqlite/              # eve-sde.db (~405 MB)
 ├── examples/                # Beispiel-Programme (API-Nutzung)
-│   └── navigation_example.go
+│   ├── navigation_example.go
+│   └── cargo_calculator.go
 ├── scripts/                 # Sync-, Transform- und Validierungslogik
 ├── docs/
 │   ├── adr/                 # Architekturentscheidungen (ADRs)
 │   ├── sqlite-implementation.md  # SQLite-Dokumentation
-│   └── navigation.md        # Navigation System Dokumentation
+│   ├── navigation.md        # Navigation System Dokumentation
+│   └── cargo-api.md         # Cargo & Hauling API Dokumentation
 └── .github/copilot-instructions.md  # Engineering-Richtlinien
 ```
 
