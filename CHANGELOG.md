@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Automatisches Release-System** (GitHub Actions)
+  - Workflow `.github/workflows/sync-sde-release.yml`
+  - Täglicher Cron-Job (03:00 UTC) prüft auf neue SDE-Versionen
+  - Bei Update: Automatischer Build und GitHub Release
+  - Release-Tag Format: `sde-v{buildNumber}-{datum}` (z.B. `sde-v3064089-2025-10-17`)
+  - Asset: `eve-sde.db.gz` (gzip level 9 komprimiert)
+  - Automatische Release-Notes mit Download-Beispielen
+  - Retention: Löscht Releases älter als 2 Jahre automatisch
+  - Validierung: Row counts und DB-Größe werden geprüft
+  - Idempotent: Überspringt bereits existierende Releases
+
 ## [0.1.0] - 2025-10-20
 
 ### Added

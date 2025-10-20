@@ -36,13 +36,18 @@ Dieses Projekt dient der:
   - CLI-Tool: `sde-sync` (orchestriert Download → Schema → Import)
   - Makefile Targets: `make sync`, `make sync-force`
   - Version-basiertes Skip-Verhalten
+- ✅ Automatisches Release-System (GitHub Actions)
+  - Täglicher Cron-Job prüft auf neue SDE-Versionen
+  - Erstellt GitHub Release mit gezippter SQLite-DB
+  - Tag-Format: `sde-v{buildNumber}-{datum}`
+  - Retention: 2 Jahre
+  - Keine manuelle Intervention erforderlich
 
 ### Nächste Schritte
 
 - [ ] YAML-Import für nested Strukturen
 - [ ] Diff/Update Mechanismus (nur Änderungen importieren)
 - [ ] Progress Tracking & Verbose Logging
-- [ ] Scheduled Sync (Cron/Systemd Timer Beispiele)
 
 ## Struktur
 
@@ -72,6 +77,28 @@ eve-sde/
 ```
 
 ## Getting Started
+
+### Option 1: Fertige SQLite-DB herunterladen (empfohlen)
+
+Die einfachste Methode ist der Download einer vorkompilierten SQLite-Datenbank:
+
+```bash
+# Neueste Version anzeigen
+gh release list --limit 1
+
+# Download (ersetze TAG mit aktuellem Release)
+gh release download sde-v3064089-2025-10-17 -p "eve-sde.db.gz"
+
+# Entpacken
+gunzip eve-sde.db.gz
+
+# Beispielabfrage
+sqlite3 eve-sde.db "SELECT name FROM types WHERE _key = 34;"
+```
+
+**Alternativ:** Manueller Download über [GitHub Releases](https://github.com/Sternrassler/eve-sde/releases)
+
+### Option 2: Lokal bauen
 
 1. Repository clonen:
 
@@ -192,6 +219,23 @@ sqlite3 data/sqlite/eve-sde.db \
 ```
 
 Details siehe [docs/sqlite-implementation.md](docs/sqlite-implementation.md)
+
+## Automatische Updates (GitHub Actions)
+
+Dieses Repository nutzt GitHub Actions für automatische SDE-Synchronisation:
+
+- **Zeitplan:** Täglich um 03:00 UTC
+- **Trigger:** Bei neuer SDE-Version (BuildNumber-Änderung)
+- **Aktion:**
+  1. Download aktueller SDE-Daten
+  2. Schema-Generierung
+  3. SQLite-Import
+  4. Erstellung eines GitHub Release
+- **Release-Tag:** `sde-v{buildNumber}-{datum}` (z.B. `sde-v3064089-2025-10-17`)
+- **Asset:** `eve-sde.db.gz` (gzip-komprimierte SQLite-DB)
+- **Retention:** Releases älter als 2 Jahre werden automatisch gelöscht
+
+Alle verfügbaren Versionen: [GitHub Releases](https://github.com/Sternrassler/eve-sde/releases)
 
 ### SDE Download
 

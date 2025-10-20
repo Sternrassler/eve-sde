@@ -1,0 +1,206 @@
+name: SDE Sync & Release
+
+on:
+  schedule:
+    # Täglich um 03:00 UTC (CCP updates sind meist gegen 11:00 UTC)
+    - cron: '0 3 * * *'
+  workflow_dispatch: # Manueller Trigger für Testing
+
+permissions:
+  contents: write # Für Release-Erstellung
+
+jobs:
+  check-and-sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Check for SDE Updates
+        id: version_check
+        run: |
+          # Temporäre leere DB für Version-Check erstellen
+          mkdir -p data/sqlite
+          
+          # Version Check durchführen
+          go run ./cmd/sde-to-sqlite --db data/sqlite/eve-sde.db --check-version > /tmp/version-check.log 2>&1 || true
+          
+          # Parse Latest Version aus Log
+          LATEST_BUILD=$(grep "Latest SDE:" /tmp/version-check.log | awk '{print $4}')
+          LATEST_DATE=$(grep "Latest SDE:" /tmp/version-check.log | awk '{print $5}' | tr -d '()')
+          LOCAL_BUILD=$(grep "Local DB:" /tmp/version-check.log | awk '{print $4}')
+          
+          echo "latest_build=$LATEST_BUILD" >> $GITHUB_OUTPUT
+          echo "latest_date=$LATEST_DATE" >> $GITHUB_OUTPUT
+          echo "local_build=$LOCAL_BUILD" >> $GITHUB_OUTPUT
+          
+          # Prüfe ob Update nötig (Local DB ist "none" bei erster Ausführung)
+          if [ "$LOCAL_BUILD" = "none" ] || [ "$LATEST_BUILD" != "$LOCAL_BUILD" ]; then
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+            echo "::notice::New SDE version available: Build $LATEST_BUILD ($LATEST_DATE)"
+          else
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+            echo "::notice::SDE is up-to-date: Build $LATEST_BUILD"
+          fi
+          
+          cat /tmp/version-check.log
+
+      - name: Check if Release exists
+        id: release_check
+        if: steps.version_check.outputs.needs_update == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="sde-v${{ steps.version_check.outputs.latest_build }}-${{ steps.version_check.outputs.latest_date }}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          
+          # Prüfe ob Release bereits existiert
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "::notice::Release $TAG already exists, skipping"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "::notice::Will create new release: $TAG"
+          fi
+
+      - name: Run SDE Sync Pipeline
+        if: steps.version_check.outputs.needs_update == 'true' && steps.release_check.outputs.exists == 'false'
+        run: |
+          echo "::group::Running full sync pipeline"
+          make sync-force
+          echo "::endgroup::"
+
+      - name: Verify Database
+        if: steps.version_check.outputs.needs_update == 'true' && steps.release_check.outputs.exists == 'false'
+        run: |
+          echo "::group::Database validation"
+          ls -lh data/sqlite/eve-sde.db
+          
+          # Grundlegende Validierung
+          sqlite3 data/sqlite/eve-sde.db "SELECT COUNT(*) as tables FROM sqlite_master WHERE type='table';"
+          sqlite3 data/sqlite/eve-sde.db "SELECT * FROM _sde;"
+          
+          # Row counts für wichtige Tabellen
+          echo "Row counts:"
+          sqlite3 data/sqlite/eve-sde.db "SELECT COUNT(*) FROM types;" || echo "types: error"
+          sqlite3 data/sqlite/eve-sde.db "SELECT COUNT(*) FROM mapMoons;" || echo "mapMoons: error"
+          echo "::endgroup::"
+
+      - name: Compress Database
+        if: steps.version_check.outputs.needs_update == 'true' && steps.release_check.outputs.exists == 'false'
+        run: |
+          echo "::group::Compressing database"
+          cd data/sqlite
+          gzip -9 -k eve-sde.db  # -k behält Original
+          ls -lh eve-sde.db*
+          
+          # Kompressionsrate anzeigen
+          ORIGINAL=$(stat -f%z eve-sde.db 2>/dev/null || stat -c%s eve-sde.db)
+          COMPRESSED=$(stat -f%z eve-sde.db.gz 2>/dev/null || stat -c%s eve-sde.db.gz)
+          RATIO=$(awk "BEGIN {printf \"%.1f\", ($ORIGINAL-$COMPRESSED)/$ORIGINAL*100}")
+          echo "::notice::Compression: $RATIO% reduction"
+          echo "::endgroup::"
+
+      - name: Create Release
+        if: steps.version_check.outputs.needs_update == 'true' && steps.release_check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.release_check.outputs.tag }}"
+          BUILD="${{ steps.version_check.outputs.latest_build }}"
+          DATE="${{ steps.version_check.outputs.latest_date }}"
+          
+          # Release Notes generieren
+          cat > /tmp/release-notes.md <<EOF
+          # EVE Online SDE - Build $BUILD
+          
+          **Release Date:** $DATE  
+          **Build Number:** $BUILD  
+          **Source:** [CCP Developer API](https://developers.eveonline.com/docs/services/static-data/)
+          
+          ## Database Contents
+          
+          - **Format:** SQLite 3
+          - **Tables:** 41
+          - **Rows:** ~500,000
+          - **Size:** ~405 MB (uncompressed)
+          - **Compression:** gzip level 9
+          
+          ## Download
+          
+          \`\`\`bash
+          # Download und entpacken
+          wget https://github.com/Sternrassler/eve-sde/releases/download/$TAG/eve-sde.db.gz
+          gunzip eve-sde.db.gz
+          
+          # Beispielabfrage
+          sqlite3 eve-sde.db "SELECT name FROM types WHERE _key = 34;"
+          \`\`\`
+          
+          ## Schema
+          
+          Vollständige Schema-Dokumentation: [docs/sqlite-implementation.md](https://github.com/Sternrassler/eve-sde/blob/main/docs/sqlite-implementation.md)
+          
+          ---
+          
+          *Automatically generated by GitHub Actions*
+          EOF
+          
+          # Release erstellen
+          gh release create "$TAG" \
+            --title "SDE Build $BUILD ($DATE)" \
+            --notes-file /tmp/release-notes.md \
+            data/sqlite/eve-sde.db.gz
+          
+          echo "::notice::Release $TAG created successfully"
+
+      - name: Cleanup Old Releases
+        if: steps.version_check.outputs.needs_update == 'true' && steps.release_check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "::group::Cleanup releases older than 2 years"
+          
+          # Cutoff-Datum: 2 Jahre zurück
+          CUTOFF_DATE=$(date -d '2 years ago' +%Y-%m-%d 2>/dev/null || date -v-2y +%Y-%m-%d)
+          echo "Cutoff date: $CUTOFF_DATE"
+          
+          # Liste alle Releases
+          gh release list --limit 1000 | while read -r line; do
+            TAG=$(echo "$line" | awk '{print $1}')
+            
+            # Extrahiere Datum aus Tag (Format: sde-v{build}-{YYYY-MM-DD})
+            RELEASE_DATE=$(echo "$TAG" | grep -oP '\d{4}-\d{2}-\d{2}$' || echo "")
+            
+            if [ -n "$RELEASE_DATE" ] && [ "$RELEASE_DATE" \< "$CUTOFF_DATE" ]; then
+              echo "Deleting old release: $TAG ($RELEASE_DATE)"
+              gh release delete "$TAG" --yes || echo "Failed to delete $TAG"
+            fi
+          done
+          
+          echo "::endgroup::"
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## SDE Sync Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Latest SDE:** Build ${{ steps.version_check.outputs.latest_build }} (${{ steps.version_check.outputs.latest_date }})" >> $GITHUB_STEP_SUMMARY
+          echo "- **Update Needed:** ${{ steps.version_check.outputs.needs_update }}" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.version_check.outputs.needs_update }}" = "true" ]; then
+            if [ "${{ steps.release_check.outputs.exists }}" = "true" ]; then
+              echo "- **Action:** Skipped (Release already exists)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- **Action:** Created release ${{ steps.release_check.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "- **Action:** No action required (up-to-date)" >> $GITHUB_STEP_SUMMARY
+          fi
