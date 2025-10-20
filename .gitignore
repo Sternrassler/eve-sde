@@ -6,6 +6,9 @@
 # Data directories (local SDE copies)
 /data/
 
+# Example output files
+route_result.json
+
 # Dependency caches
 node_modules/
 vendor/
