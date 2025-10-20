@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Navigation & Intelligence System** (`pkg/evedb/navigation/`)
+  - Go API für Pathfinding, Travel Time Berechnung, Security Filtering
+  - SQL Views: `v_stargate_graph`, `v_system_info`, `v_system_security_zones`, `v_region_stats`, `v_trade_hubs`
+  - Performance: Kurze Routen (<10 Jumps) in <100ms
+  - Beispiel-Programm: `examples/navigation_example.go`
+
+### Changed
+
+- **Architektur-Refactoring: DB-Core vs. API Layer Separation** (ADR-001)
+  - Navigation API verschoben: `internal/sqlite/navigation/` → `pkg/evedb/navigation/`
+  - SQL Views extrahiert: `internal/sqlite/views/` (DB-Core)
+  - Rationale: SQLite-Datenbank ist Kernprodukt, Go APIs sind optionale Convenience Layer
+  - Ermöglicht externe Nutzung der API ohne Exposition interner DB-Implementierung
+
+### Fixed
+
+- View-Schema: `v_system_info` nutzt korrektes Feld (`_key` statt `solarSystemID`)
+
+### Removed
+
+- Workflow: `.github/workflows/issue-dependency-enforcement.yml` (nicht genutzt)
+
+### Known Issues
+
+- Performance: Lange Routen (40+ Jumps) haben O(n³) Komplexität wegen JSON-basierter Cycle-Detection (Issue #3)
+
+### Added
+
 - **Automatisches Release-System** (GitHub Actions)
   - Workflow `.github/workflows/sync-sde-release.yml`
   - Täglicher Cron-Job (03:00 UTC) prüft auf neue SDE-Versionen
