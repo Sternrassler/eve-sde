@@ -3,6 +3,9 @@
 /build/
 /tmp/
 
+# Data directories (local SDE copies)
+/data/
+
 # Dependency caches
 node_modules/
 vendor/
