@@ -6,7 +6,7 @@ package types
 
 // PlanetResources represents the schema for planetResources.jsonl
 type PlanetResources struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	CycleMinutes int64 `json:"cycle_minutes,omitempty"`
 	HarvestSiloMax int64 `json:"harvest_silo_max,omitempty"`
 	MaturationCycleMinutes int64 `json:"maturation_cycle_minutes,omitempty"`

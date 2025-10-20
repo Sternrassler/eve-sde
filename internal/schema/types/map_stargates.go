@@ -6,7 +6,7 @@ package types
 
 // MapStargates represents the schema for mapStargates.jsonl
 type MapStargates struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Destination map[string]interface{} `json:"destination,omitempty"`
 	Position map[string]interface{} `json:"position,omitempty"`
 	SolarSystemID int64 `json:"solarSystemID,omitempty"`

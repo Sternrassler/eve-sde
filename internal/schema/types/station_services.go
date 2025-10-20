@@ -6,7 +6,7 @@ package types
 
 // StationServices represents the schema for stationServices.jsonl
 type StationServices struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Description LocalizedText `json:"description,omitempty"`
 	ServiceName LocalizedText `json:"serviceName,omitempty"`
 }

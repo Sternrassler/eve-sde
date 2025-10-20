@@ -6,7 +6,7 @@ package types
 
 // Bloodlines represents the schema for bloodlines.jsonl
 type Bloodlines struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Charisma int64 `json:"charisma,omitempty"`
 	CorporationID int64 `json:"corporationID,omitempty"`
 	Description LocalizedText `json:"description,omitempty"`

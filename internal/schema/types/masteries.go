@@ -6,6 +6,6 @@ package types
 
 // Masteries represents the schema for masteries.jsonl
 type Masteries struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Value []map[string]interface{} `json:"_value,omitempty"`
 }

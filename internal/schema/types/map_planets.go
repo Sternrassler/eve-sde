@@ -6,7 +6,7 @@ package types
 
 // MapPlanets represents the schema for mapPlanets.jsonl
 type MapPlanets struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	AsteroidBeltIDs []int64 `json:"asteroidBeltIDs,omitempty"`
 	Attributes map[string]interface{} `json:"attributes,omitempty"`
 	CelestialIndex int64 `json:"celestialIndex,omitempty"`

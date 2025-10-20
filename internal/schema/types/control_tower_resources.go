@@ -6,6 +6,6 @@ package types
 
 // ControlTowerResources represents the schema for controlTowerResources.jsonl
 type ControlTowerResources struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Resources []map[string]interface{} `json:"resources,omitempty"`
 }

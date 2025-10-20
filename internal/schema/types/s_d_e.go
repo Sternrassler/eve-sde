@@ -7,6 +7,6 @@ package types
 // SDE represents the schema for _sde.jsonl
 type SDE struct {
 	Key string `json:"_key"`
-	BuildNumber int64 `json:"buildNumber"`
-	ReleaseDate string `json:"releaseDate"`
+	BuildNumber int64 `json:"buildNumber,omitempty"`
+	ReleaseDate string `json:"releaseDate,omitempty"`
 }

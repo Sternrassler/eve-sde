@@ -6,7 +6,7 @@ package types
 
 // TypeDogma represents the schema for typeDogma.jsonl
 type TypeDogma struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	DogmaAttributes []map[string]interface{} `json:"dogmaAttributes,omitempty"`
 	DogmaEffects []map[string]interface{} `json:"dogmaEffects,omitempty"`
 }

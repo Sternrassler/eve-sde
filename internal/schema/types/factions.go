@@ -6,7 +6,7 @@ package types
 
 // Factions represents the schema for factions.jsonl
 type Factions struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	CorporationID int64 `json:"corporationID,omitempty"`
 	Description LocalizedText `json:"description,omitempty"`
 	FlatLogo string `json:"flatLogo,omitempty"`

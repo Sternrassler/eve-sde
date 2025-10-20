@@ -6,7 +6,7 @@ package types
 
 // MarketGroups represents the schema for marketGroups.jsonl
 type MarketGroups struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Description LocalizedText `json:"description,omitempty"`
 	HasTypes bool `json:"hasTypes,omitempty"`
 	IconID int64 `json:"iconID,omitempty"`

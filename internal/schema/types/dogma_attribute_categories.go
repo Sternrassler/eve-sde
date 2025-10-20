@@ -6,7 +6,7 @@ package types
 
 // DogmaAttributeCategories represents the schema for dogmaAttributeCategories.jsonl
 type DogmaAttributeCategories struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Description string `json:"description,omitempty"`
 	Name string `json:"name,omitempty"`
 }

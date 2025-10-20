@@ -6,7 +6,7 @@ package types
 
 // Graphics represents the schema for graphics.jsonl
 type Graphics struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	GraphicFile string `json:"graphicFile,omitempty"`
 	IconFolder string `json:"iconFolder,omitempty"`
 	SofFactionName string `json:"sofFactionName,omitempty"`

@@ -6,7 +6,7 @@ package types
 
 // MapMoons represents the schema for mapMoons.jsonl
 type MapMoons struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Attributes map[string]interface{} `json:"attributes,omitempty"`
 	CelestialIndex int64 `json:"celestialIndex,omitempty"`
 	NpcStationIDs []int64 `json:"npcStationIDs,omitempty"`

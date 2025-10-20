@@ -6,6 +6,6 @@ package types
 
 // CorporationActivities represents the schema for corporationActivities.jsonl
 type CorporationActivities struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Name LocalizedText `json:"name,omitempty"`
 }

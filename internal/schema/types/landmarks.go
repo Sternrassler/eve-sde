@@ -6,7 +6,7 @@ package types
 
 // Landmarks represents the schema for landmarks.jsonl
 type Landmarks struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Description LocalizedText `json:"description,omitempty"`
 	IconID int64 `json:"iconID,omitempty"`
 	LocationID int64 `json:"locationID,omitempty"`

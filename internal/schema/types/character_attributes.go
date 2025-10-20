@@ -6,7 +6,7 @@ package types
 
 // CharacterAttributes represents the schema for characterAttributes.jsonl
 type CharacterAttributes struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Description string `json:"description,omitempty"`
 	IconID int64 `json:"iconID,omitempty"`
 	Name LocalizedText `json:"name,omitempty"`

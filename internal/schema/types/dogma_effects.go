@@ -6,7 +6,7 @@ package types
 
 // DogmaEffects represents the schema for dogmaEffects.jsonl
 type DogmaEffects struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Description LocalizedText `json:"description,omitempty"`
 	DisallowAutoRepeat bool `json:"disallowAutoRepeat,omitempty"`
 	DischargeAttributeID int64 `json:"dischargeAttributeID,omitempty"`

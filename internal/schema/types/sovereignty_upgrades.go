@@ -6,7 +6,7 @@ package types
 
 // SovereigntyUpgrades represents the schema for sovereigntyUpgrades.jsonl
 type SovereigntyUpgrades struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	FuelHourlyUpkeep int64 `json:"fuel_hourly_upkeep,omitempty"`
 	FuelStartupCost int64 `json:"fuel_startup_cost,omitempty"`
 	FuelTypeID int64 `json:"fuel_type_id,omitempty"`

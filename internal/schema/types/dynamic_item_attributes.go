@@ -6,7 +6,7 @@ package types
 
 // DynamicItemAttributes represents the schema for dynamicItemAttributes.jsonl
 type DynamicItemAttributes struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	AttributeIDs []map[string]interface{} `json:"attributeIDs,omitempty"`
 	InputOutputMapping []map[string]interface{} `json:"inputOutputMapping,omitempty"`
 }

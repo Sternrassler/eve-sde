@@ -88,11 +88,14 @@ type {{ .TypeName }} struct {
 			goType = "LocalizedText"
 		}
 
+		// _key ist immer required (primary key)
+		isRequired := field.IsRequired || jsonName == "_key"
+
 		data.Fields = append(data.Fields, FieldData{
 			Name:     goName,
 			Type:     goType,
 			JSONTag:  jsonName,
-			Required: field.IsRequired,
+			Required: isRequired,
 		})
 	}
 	// Render Template

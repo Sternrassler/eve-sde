@@ -6,7 +6,7 @@ package types
 
 // DogmaUnits represents the schema for dogmaUnits.jsonl
 type DogmaUnits struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Description LocalizedText `json:"description,omitempty"`
 	DisplayName LocalizedText `json:"displayName,omitempty"`
 	Name string `json:"name,omitempty"`

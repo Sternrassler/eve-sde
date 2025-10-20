@@ -6,7 +6,7 @@ package types
 
 // AgentsInSpace represents the schema for agentsInSpace.jsonl
 type AgentsInSpace struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	DungeonID int64 `json:"dungeonID,omitempty"`
 	SolarSystemID int64 `json:"solarSystemID,omitempty"`
 	SpawnPointID int64 `json:"spawnPointID,omitempty"`

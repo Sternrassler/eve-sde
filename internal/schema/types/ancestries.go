@@ -6,7 +6,7 @@ package types
 
 // Ancestries represents the schema for ancestries.jsonl
 type Ancestries struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	BloodlineID int64 `json:"bloodlineID,omitempty"`
 	Charisma int64 `json:"charisma,omitempty"`
 	Description LocalizedText `json:"description,omitempty"`

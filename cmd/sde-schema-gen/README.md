@@ -115,12 +115,14 @@ type LocalizedText struct {
 ## Why Not Python?
 
 Previous approach used embedded Python in bash script - this was:
+
 - ❌ Hard to debug (Python-in-bash)
 - ❌ Incomplete recursion (missing nested struct definitions)
 - ❌ Complex type handling
 - ❌ No proper testing
 
 New Go-based tool provides:
+
 - ✅ Type-safe code generation
 - ✅ Debuggable with standard Go tools
 - ✅ Template-based approach

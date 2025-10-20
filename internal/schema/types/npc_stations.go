@@ -6,7 +6,7 @@ package types
 
 // NpcStations represents the schema for npcStations.jsonl
 type NpcStations struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	CelestialIndex int64 `json:"celestialIndex,omitempty"`
 	OperationID int64 `json:"operationID,omitempty"`
 	OrbitID int64 `json:"orbitID,omitempty"`

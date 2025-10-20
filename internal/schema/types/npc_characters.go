@@ -6,7 +6,7 @@ package types
 
 // NpcCharacters represents the schema for npcCharacters.jsonl
 type NpcCharacters struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	AncestryID int64 `json:"ancestryID,omitempty"`
 	BloodlineID int64 `json:"bloodlineID,omitempty"`
 	CareerID int64 `json:"careerID,omitempty"`

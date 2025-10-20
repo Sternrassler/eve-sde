@@ -6,7 +6,7 @@ package types
 
 // Skins represents the schema for skins.jsonl
 type Skins struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	AllowCCPDevs bool `json:"allowCCPDevs,omitempty"`
 	InternalName string `json:"internalName,omitempty"`
 	IsStructureSkin bool `json:"isStructureSkin,omitempty"`

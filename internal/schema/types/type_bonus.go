@@ -6,7 +6,7 @@ package types
 
 // TypeBonus represents the schema for typeBonus.jsonl
 type TypeBonus struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	IconID int64 `json:"iconID,omitempty"`
 	MiscBonuses []map[string]interface{} `json:"miscBonuses,omitempty"`
 	RoleBonuses []map[string]interface{} `json:"roleBonuses,omitempty"`

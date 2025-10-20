@@ -6,7 +6,7 @@ package types
 
 // MetaGroups represents the schema for metaGroups.jsonl
 type MetaGroups struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Color map[string]interface{} `json:"color,omitempty"`
 	Description LocalizedText `json:"description,omitempty"`
 	IconID int64 `json:"iconID,omitempty"`

@@ -6,7 +6,7 @@ package types
 
 // NpcCorporationDivisions represents the schema for npcCorporationDivisions.jsonl
 type NpcCorporationDivisions struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Description LocalizedText `json:"description,omitempty"`
 	DisplayName string `json:"displayName,omitempty"`
 	InternalName string `json:"internalName,omitempty"`

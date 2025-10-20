@@ -6,7 +6,7 @@ package types
 
 // DbuffCollections represents the schema for dbuffCollections.jsonl
 type DbuffCollections struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	AggregateMode string `json:"aggregateMode,omitempty"`
 	DeveloperDescription string `json:"developerDescription,omitempty"`
 	DisplayName LocalizedText `json:"displayName,omitempty"`

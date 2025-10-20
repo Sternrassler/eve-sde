@@ -6,7 +6,7 @@ package types
 
 // Categories represents the schema for categories.jsonl
 type Categories struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	IconID int64 `json:"iconID,omitempty"`
 	Name LocalizedText `json:"name,omitempty"`
 	Published bool `json:"published,omitempty"`

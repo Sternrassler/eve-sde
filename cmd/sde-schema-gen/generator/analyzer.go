@@ -48,29 +48,47 @@ func AnalyzeJSONL(path string, maxLines int) (*Schema, error) {
 			field, exists := schema.Fields[key]
 			if !exists {
 				field = &FieldInfo{
-					IsRequired:   true, // Startannahme
+					IsRequired:   key == "_key", // _key ist immer required
 					SampleValues: make([]interface{}, 0, 3),
 				}
 				schema.Fields[key] = field
 			}
 
-			// Speichere Sample-Werte (max 3)
-			if len(field.SampleValues) < 3 && value != nil {
-				field.SampleValues = append(field.SampleValues, value)
-			}
+			// Zähle Vorkommen (auch null)
+			field.SampleValues = append(field.SampleValues[:0:0], field.SampleValues...) // Ensure capacity
 
-			// Inferiere Typ
-			goType := inferGoType(value)
-			if field.GoType == "" {
-				field.GoType = goType
-			} else if field.GoType != goType && goType != "interface{}" {
-				// Typ-Konflikt → fallback zu interface{}
-				field.GoType = "interface{}"
-			}
+			// Speichere Non-Null Sample-Werte (max 3)
+			if value != nil {
+				if len(field.SampleValues) < 3 {
+					field.SampleValues = append(field.SampleValues, value)
+				}
 
-			// Prüfe auf LocalizedText
-			if !field.IsLocalized {
-				field.IsLocalized = isLocalizedText(value)
+				// Inferiere Typ (ignoriere null)
+				goType := inferGoType(value)
+
+				// Typ-Logik: Ignoriere interface{} als Kandidat
+				if goType == "interface{}" {
+					continue
+				}
+
+				if field.GoType == "" || field.GoType == "interface{}" {
+					// Erster echter Typ oder Override von interface{}
+					field.GoType = goType
+				} else if field.GoType != goType {
+					// Spezialfall: int64 + float64 → float64 (JSON-Zahlen)
+					if (field.GoType == "int64" && goType == "float64") ||
+						(field.GoType == "float64" && goType == "int64") {
+						field.GoType = "float64"
+					} else {
+						// Echter Typ-Konflikt → fallback zu interface{}
+						field.GoType = "interface{}"
+					}
+				}
+
+				// Prüfe auf LocalizedText
+				if !field.IsLocalized {
+					field.IsLocalized = isLocalizedText(value)
+				}
 			}
 		}
 	}
@@ -79,9 +97,17 @@ func AnalyzeJSONL(path string, maxLines int) (*Schema, error) {
 		return nil, fmt.Errorf("fehler beim Lesen: %w", err)
 	}
 
-	// Markiere Felder als optional, die nicht in allen Zeilen vorkommen
-	for _, field := range schema.Fields {
-		if lineCount > 1 && len(field.SampleValues) < lineCount {
+	// Markiere Felder als optional basierend auf Sample-Count
+	// (Felder ohne Samples = nur null-Werte = optional)
+	for key, field := range schema.Fields {
+		if key == "_key" {
+			field.IsRequired = true // _key immer required
+			continue
+		}
+		// Wenn wir Sample-Werte haben und sie in allen Zeilen vorkommen → required
+		if len(field.SampleValues) == lineCount && lineCount > 1 {
+			field.IsRequired = true
+		} else {
 			field.IsRequired = false
 		}
 	}

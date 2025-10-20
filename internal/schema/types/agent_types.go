@@ -6,6 +6,6 @@ package types
 
 // AgentTypes represents the schema for agentTypes.jsonl
 type AgentTypes struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Name string `json:"name,omitempty"`
 }

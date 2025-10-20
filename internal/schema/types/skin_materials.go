@@ -6,7 +6,7 @@ package types
 
 // SkinMaterials represents the schema for skinMaterials.jsonl
 type SkinMaterials struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	DisplayName LocalizedText `json:"displayName,omitempty"`
 	MaterialSetID int64 `json:"materialSetID,omitempty"`
 }

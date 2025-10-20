@@ -6,7 +6,7 @@ package types
 
 // Types represents the schema for types.jsonl
 type Types struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	BasePrice int64 `json:"basePrice,omitempty"`
 	Capacity int64 `json:"capacity,omitempty"`
 	Description LocalizedText `json:"description,omitempty"`
@@ -14,7 +14,7 @@ type Types struct {
 	GroupID int64 `json:"groupID,omitempty"`
 	IconID int64 `json:"iconID,omitempty"`
 	MarketGroupID int64 `json:"marketGroupID,omitempty"`
-	Mass interface{} `json:"mass,omitempty"`
+	Mass float64 `json:"mass,omitempty"`
 	MetaGroupID int64 `json:"metaGroupID,omitempty"`
 	Name LocalizedText `json:"name,omitempty"`
 	PortionSize int64 `json:"portionSize,omitempty"`
@@ -22,5 +22,5 @@ type Types struct {
 	RaceID int64 `json:"raceID,omitempty"`
 	Radius int64 `json:"radius,omitempty"`
 	SoundID int64 `json:"soundID,omitempty"`
-	Volume interface{} `json:"volume,omitempty"`
+	Volume float64 `json:"volume,omitempty"`
 }

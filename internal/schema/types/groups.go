@@ -6,7 +6,7 @@ package types
 
 // Groups represents the schema for groups.jsonl
 type Groups struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Anchorable bool `json:"anchorable,omitempty"`
 	Anchored bool `json:"anchored,omitempty"`
 	CategoryID int64 `json:"categoryID,omitempty"`

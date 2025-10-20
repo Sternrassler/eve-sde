@@ -6,6 +6,6 @@ package types
 
 // ContrabandTypes represents the schema for contrabandTypes.jsonl
 type ContrabandTypes struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Factions []map[string]interface{} `json:"factions,omitempty"`
 }

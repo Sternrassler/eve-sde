@@ -6,6 +6,6 @@ package types
 
 // TranslationLanguages represents the schema for translationLanguages.jsonl
 type TranslationLanguages struct {
-	Key string `json:"_key,omitempty"`
+	Key string `json:"_key"`
 	Name string `json:"name,omitempty"`
 }

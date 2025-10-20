@@ -6,7 +6,7 @@ package types
 
 // MapConstellations represents the schema for mapConstellations.jsonl
 type MapConstellations struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	FactionID int64 `json:"factionID,omitempty"`
 	Name LocalizedText `json:"name,omitempty"`
 	Position map[string]interface{} `json:"position,omitempty"`

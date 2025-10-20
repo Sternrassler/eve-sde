@@ -6,7 +6,7 @@ package types
 
 // Races represents the schema for races.jsonl
 type Races struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Description LocalizedText `json:"description,omitempty"`
 	IconID int64 `json:"iconID,omitempty"`
 	Name LocalizedText `json:"name,omitempty"`

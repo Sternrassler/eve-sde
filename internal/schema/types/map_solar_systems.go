@@ -6,7 +6,7 @@ package types
 
 // MapSolarSystems represents the schema for mapSolarSystems.jsonl
 type MapSolarSystems struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	Border bool `json:"border,omitempty"`
 	ConstellationID int64 `json:"constellationID,omitempty"`
 	Corridor bool `json:"corridor,omitempty"`
@@ -21,7 +21,7 @@ type MapSolarSystems struct {
 	RegionID int64 `json:"regionID,omitempty"`
 	Regional bool `json:"regional,omitempty"`
 	SecurityClass string `json:"securityClass,omitempty"`
-	SecurityStatus interface{} `json:"securityStatus,omitempty"`
+	SecurityStatus float64 `json:"securityStatus,omitempty"`
 	StarID int64 `json:"starID,omitempty"`
 	StargateIDs []int64 `json:"stargateIDs,omitempty"`
 	VisualEffect string `json:"visualEffect,omitempty"`

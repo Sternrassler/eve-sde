@@ -6,12 +6,12 @@ package types
 
 // MapAsteroidBelts represents the schema for mapAsteroidBelts.jsonl
 type MapAsteroidBelts struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	CelestialIndex int64 `json:"celestialIndex,omitempty"`
 	OrbitID int64 `json:"orbitID,omitempty"`
 	OrbitIndex int64 `json:"orbitIndex,omitempty"`
 	Position map[string]interface{} `json:"position,omitempty"`
-	Radius interface{} `json:"radius,omitempty"`
+	Radius float64 `json:"radius,omitempty"`
 	SolarSystemID int64 `json:"solarSystemID,omitempty"`
 	Statistics map[string]interface{} `json:"statistics,omitempty"`
 	TypeID int64 `json:"typeID,omitempty"`

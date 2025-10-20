@@ -6,7 +6,7 @@ package types
 
 // NpcCorporations represents the schema for npcCorporations.jsonl
 type NpcCorporations struct {
-	Key int64 `json:"_key,omitempty"`
+	Key int64 `json:"_key"`
 	AllowedMemberRaces []int64 `json:"allowedMemberRaces,omitempty"`
 	CeoID int64 `json:"ceoID,omitempty"`
 	CorporationTrades []map[string]interface{} `json:"corporationTrades,omitempty"`
@@ -32,10 +32,10 @@ type NpcCorporations struct {
 	SendCharTerminationMessage bool `json:"sendCharTerminationMessage,omitempty"`
 	Shares int64 `json:"shares,omitempty"`
 	Size string `json:"size,omitempty"`
-	SizeFactor interface{} `json:"sizeFactor,omitempty"`
+	SizeFactor float64 `json:"sizeFactor,omitempty"`
 	SolarSystemID int64 `json:"solarSystemID,omitempty"`
 	StationID int64 `json:"stationID,omitempty"`
-	TaxRate interface{} `json:"taxRate,omitempty"`
+	TaxRate float64 `json:"taxRate,omitempty"`
 	TickerName string `json:"tickerName,omitempty"`
 	UniqueName bool `json:"uniqueName,omitempty"`
 }
