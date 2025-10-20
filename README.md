@@ -1,79 +1,39 @@
-# EVE Online Static Data Export (SDE) Synchronisation
+# EVE Online SDE Database
 
-Automatisierte Synchronisation und Aufbereitung der EVE Online Static Data Export (SDE) von der [CCP Developer API](https://developers.eveonline.com/docs/services/static-data/).
+Produktionsfertiges SQLite-Datenbank-System für EVE Online Static Data Export (SDE). Automatische tägliche Updates via GitHub Actions.
 
-## Ziel
+## Quick Start
 
-Dieses Projekt dient der:
+```bash
+# Download neueste SQLite-Datenbank (empfohlen)
+gh release download --pattern "eve-sde.db.gz"
+gunzip eve-sde.db.gz
 
-1. **Synchronisation** der EVE SDE mit einem lokalen Verzeichnis in mehreren Formaten:
-   - JSONL (JSON Lines) für streaming-optimierte Verarbeitung
-   - YAML für menschenlesbare Inspektion und Versionskontrolle
+# Beispiel-Abfrage
+sqlite3 eve-sde.db "SELECT name FROM types WHERE _key = 34;"
+# {"de":"Tritanium","en":"Tritanium",...}
+```
 
-2. **Transformation** der Rohdaten in eine optimierte SQLite-Datenbank für:
-   - Schnelle Abfragen und Lookups
-   - Verwendung in anderen EVE-bezogenen Projekten
-   - Offline-Verfügbarkeit der Spieldaten
-
-## Projektstatus
-
-**v0.1.0** – SQLite-Datenbank & Sync-Automatisierung abgeschlossen.
-
-### Fertiggestellt
-
-- ✅ SDE Download-Mechanismus (JSONL + YAML)
-- ✅ Schema-Generierung (53 typsichere Go-Structs)
-- ✅ SQLite-Datenbank-Implementierung
-  - Reflection-basierter Schema-Generator
-  - Streaming JSONL-Importer mit Batch-Processing
-  - CLI-Tool: `sde-to-sqlite`
-  - Performance: 500k Zeilen in 24s, 405 MB DB
-- ✅ Version Tracking System
-  - CCP API Integration (Build-Nummer & Release-Datum)
-  - Intelligente Update-Erkennung
-  - CLI-Flags: `--check-version`, `--skip-if-current`
-- ✅ Sync-Pipeline Automatisierung
-  - CLI-Tool: `sde-sync` (orchestriert Download → Schema → Import)
-  - Makefile Targets: `make sync`, `make sync-force`
-  - Version-basiertes Skip-Verhalten
-- ✅ Automatisches Release-System (GitHub Actions)
-  - Täglicher Cron-Job prüft auf neue SDE-Versionen
-  - Erstellt GitHub Release mit gezippter SQLite-DB
-  - Tag-Format: `sde-v{buildNumber}-{datum}`
-  - Retention: 2 Jahre
-  - Keine manuelle Intervention erforderlich
-
-### Nächste Schritte
-
-- [ ] YAML-Import für nested Strukturen
-- [ ] Diff/Update Mechanismus (nur Änderungen importieren)
-- [ ] Progress Tracking & Verbose Logging
+**Alternative:** [Manueller Download](https://github.com/Sternrassler/eve-sde/releases) (neueste Release)
 
 ## Features
 
-### Navigation & Intelligence System (NEU in v0.2.0)
+### Core Database (v0.2.0)
 
-Das Projekt bietet jetzt ein vollständiges Navigation- und Intelligence-System für EVE Online:
+- **SQLite-Datenbank**: 405 MB, 41 Tabellen, ~500k Zeilen
+- **Auto-Updates**: Täglich um 03:00 UTC via GitHub Actions
+- **Performance**: 20k Zeilen/Sekunde Import, Sub-Millisekunden Pathfinding
+- **Offline-fähig**: Keine Runtime-Abhängigkeiten außer SQLite
 
-- **Pathfinding**: Kürzeste Routen zwischen Systemen (Dijkstra via SQLite Recursive CTE)
-- **Travel Time Calculation**: Reisezeit-Berechnung mit optionalen Schiffs-Parametern
-- **Security Filtering**: Vermeidung von Low-Sec/Null-Sec Systemen
-- **Trade Hub Analysis**: Distanz zu Major Trade Hubs (Jita, Amarr, Dodixie, Rens, Hek)
-- **Region Intelligence**: Security-Zonen und Region-Statistiken
+### Navigation System
 
-**Beispiel:**
 ```bash
-# Schnellste Route von Jita nach Amarr
+# Go-API Beispiel (optional)
 go run examples/navigation_example.go
-
-# Mit Interceptor-Parametern (schneller)
-go run examples/navigation_example.go -warp 6.0 -align 2.5
-
-# Nur High-Sec Route
-go run examples/navigation_example.go -safe
+# Jita → Amarr: 40 jumps in 273µs
 ```
 
-Siehe [docs/navigation.md](docs/navigation.md) und [examples/README.md](examples/README.md) für Details.
+**Features:**
 
 ### Cargo & Hauling API (NEU in v0.2.0)
 
@@ -151,237 +111,127 @@ eve-sde/
 ```
 
 ## Getting Started
+- Dijkstra Pathfinding (11,500 Stargates, 5,700 Systeme)
+- Travel Time Berechnung mit Schiffs-Parametern
+- Security Filtering (High-Sec only Routes)
+- Trade Hub Analysis (Jita, Amarr, Dodixie, Rens, Hek)
 
-### Option 1: Fertige SQLite-DB herunterladen (empfohlen)
+Details: [docs/navigation.md](docs/navigation.md)
 
-Die einfachste Methode ist der Download einer vorkompilierten SQLite-Datenbank:
+Details: [docs/navigation.md](docs/navigation.md)
 
-```bash
-# Neueste Version anzeigen
-gh release list --limit 1
+## Architektur
 
-# Download (ersetze TAG mit aktuellem Release)
-gh release download sde-v3064089-2025-10-17 -p "eve-sde.db.gz"
+**DB-First Philosophy:** SQLite-Datenbank ist primäres Produkt, Go-Code ist Build-Tool.
 
-# Entpacken
-gunzip eve-sde.db.gz
-
-# Beispielabfrage
-sqlite3 eve-sde.db "SELECT name FROM types WHERE _key = 34;"
+```text
+eve-sde/
+├── cmd/                     # Build-Tools (lokal)
+│   ├── sde-to-sqlite/       # DB Import (JSONL → SQLite)
+│   └── sde-sync/            # Download & Sync Orchestrator
+├── internal/                # DB-Core Implementation
+│   ├── sqlite/
+│   │   ├── schema/          # DDL Generator
+│   │   ├── importer/        # JSONL Streaming Importer
+│   │   └── views/           # SQL Views (Navigation, Stats)
+│   └── schema/types/        # 53 Go Structs (generiert)
+├── pkg/evedb/               # Optional: Go APIs
+│   └── navigation/          # Navigation API (Pathfinding, Travel Time)
+├── data/                    # Lokale Daten (gitignored)
+│   └── sqlite/eve-sde.db    # **HAUPTPRODUKT**
+└── docs/                    # Technische Dokumentation
+    ├── adr/                 # Architektur-Entscheidungen
+    └── navigation.md        # Navigation System Docs
 ```
 
-**Alternativ:** Manueller Download über [GitHub Releases](https://github.com/Sternrassler/eve-sde/releases)
+**Nutzung:**
 
-### Option 2: Lokal bauen
+- **Direkt:** SQLite-DB via `sqlite3` CLI oder Bibliotheken (Python, Node.js, etc.)
+- **Go API:** Optional via `pkg/evedb/navigation` (Convenience Layer)
 
-1. Repository clonen:
+Details: [docs/adr/ADR-001-db-core-api-separation.md](docs/adr/ADR-001-db-core-api-separation.md)
 
-   ```bash
-   git clone https://github.com/Sternrassler/eve-sde.git
-   cd eve-sde
-   ```
-
-2. Git Hooks aktivieren:
-
-   ```bash
-   git config core.hooksPath .githooks
-   ```
-
-3. SDE-Daten herunterladen:
-
-   ```bash
-   ./scripts/download-sde.sh
-   ```
-
-   Dies lädt automatisch die neuesten YAML und JSONL Exporte (~160MB komprimiert) herunter und extrahiert sie nach `data/yaml/` und `data/jsonl/`.
-
-4. Go-Schemas generieren (optional - bereits committed):
-
-   ```bash
-   go run ./cmd/sde-schema-gen
-   ```
-
-   Analysiert die JSONL-Dateien und generiert typsichere Go-Structs in `internal/schema/types/`.
-
-5. SQLite-Datenbank erstellen:
-
-   ```bash
-   # Alle Schemas importieren (41 Tabellen, ~24s)
-   go run ./cmd/sde-to-sqlite
-
-   # Nur spezifische Tabelle importieren
-   go run ./cmd/sde-to-sqlite --import types
-
-   # Custom DB-Pfad
-   go run ./cmd/sde-to-sqlite --db custom/path.db
-   ```
-
-   **Performance**: 500.000 Zeilen in 24 Sekunden, 405 MB Datenbank
-
-   Details siehe [docs/sqlite-implementation.md](docs/sqlite-implementation.md)
-
-## Verwendung
-
-### Schema-Generierung
-
-Generiert typsichere Go-Structs aus JSONL-Daten:
+## Lokaler Build (Optional)
 
 ```bash
-go run ./cmd/sde-schema-gen
-```
+# Repository clonen
+git clone https://github.com/Sternrassler/eve-sde.git
+cd eve-sde
 
-**Features**:
-
-- Automatische Typerkennung (int64, float64, string, bool)
-- LocalizedText-Detection (8 Sprachen: de, en, es, fr, ja, ko, ru, zh)
-- Required-Field-Detection (basierend auf NULL-Präsenz)
-- 53 generierte Schemas in `internal/schema/types/`
-
-### SQLite-Datenbank
-
-Importiert alle JSONL-Daten in eine SQLite-Datenbank:
-
-```bash
-# Vollautomatischer Sync (Version Check → Download → Schema → Import)
+# Automatischer Sync (Download → Import → Views)
 make sync
 
-# Erzwinge Update (auch wenn DB aktuell)
-make sync-force
-
-# Nur Download + Schema (kein SQLite Import)
-make sync-download-only
-
-# Manueller Full Import (alle 41 Schemas)
-go run ./cmd/sde-to-sqlite
-
-# Einzeltabelle
-go run ./cmd/sde-to-sqlite --import types
-
-# Custom DB-Pfad
-go run ./cmd/sde-to-sqlite --db custom/eve.db --jsonl data/jsonl
-
-# Version prüfen
-go run ./cmd/sde-to-sqlite --check-version
-
-# Nur bei Update importieren
-go run ./cmd/sde-to-sqlite --skip-if-current
-
-# Nur Schema erstellen (ohne Daten)
-go run ./cmd/sde-to-sqlite --init
+# Datenbank-Pfad
+ls -lh data/sqlite/eve-sde.db  # 405 MB
 ```
 
-**Performance-Metriken**:
+**Makefile Targets:**
 
-| Metrik | Wert |
-|--------|------|
-| Import-Zeit | 24 Sekunden (41 Tabellen) |
-| Datensätze | ~500.000 Zeilen |
-| DB-Größe | 405 MB (18% Kompression) |
-| Durchsatz | ~20.000 Zeilen/Sekunde |
+- `make sync` - Vollautomatischer Download & Import
+- `make sync-force` - Erzwinge Update (löscht alte DB)
+- `make test` - Go Tests ausführen
 
-**Datenvalidierung**:
+## Datenbank-Schema
 
-```bash
-# Zeilenzahlen prüfen
-sqlite3 data/sqlite/eve-sde.db "SELECT COUNT(*) FROM types;"  # 50,486
-wc -l data/jsonl/types.jsonl  # 50,486 ✓
+**41 Tabellen:**
 
-# LocalizedText Beispiel
-sqlite3 data/sqlite/eve-sde.db \
-  "SELECT name FROM types WHERE _key = 34 LIMIT 1;"
-# {"de":"Tritanium","en":"Tritanium","es":"Tritanio",...}
+- `types` (50k Zeilen) - Items, Ships, Modules
+- `mapSolarSystems` (5.7k) - Systeme mit Security Status
+- `mapStargates` (11.5k) - Stargate-Verbindungen
+- `groups`, `categories`, `regions`, `constellations`, ...
+
+**5 SQL Views:**
+
+- `v_stargate_graph` - Pathfinding Graph
+- `v_system_info` - System-Metadaten
+- `v_trade_hubs` - Major Trade Hubs (Jita, Amarr, etc.)
+- `v_region_stats`, `v_system_security_zones`
+
+```sql
+-- Beispiel: Tritanium Details
+SELECT name, volume, basePrice 
+FROM types 
+WHERE _key = 34;
 ```
 
-Details siehe [docs/sqlite-implementation.md](docs/sqlite-implementation.md)
+Details: [docs/sqlite-implementation.md](docs/sqlite-implementation.md)
 
-## Automatische Updates (GitHub Actions)
+## Automatische Updates
 
-Dieses Repository nutzt GitHub Actions für automatische SDE-Synchronisation:
+**GitHub Actions** (`sync-sde-release.yml`):
 
-- **Zeitplan:** Täglich um 03:00 UTC
-- **Trigger:** Bei neuer SDE-Version (BuildNumber-Änderung)
-- **Aktion:**
-  1. Download aktueller SDE-Daten
-  2. Schema-Generierung
-  3. SQLite-Import
-  4. Erstellung eines GitHub Release
-- **Release-Tag:** `sde-v{buildNumber}-{datum}` (z.B. `sde-v3064089-2025-10-17`)
-- **Asset:** `eve-sde.db.gz` (gzip-komprimierte SQLite-DB)
-- **Retention:** Releases älter als 2 Jahre werden automatisch gelöscht
+- **Zeitplan:** Täglich 03:00 UTC
+- **Trigger:** Neue SDE BuildNumber von CCP API
+- **Output:** GitHub Release mit `eve-sde.db.gz`
+- **Retention:** 2 Jahre
 
-Alle verfügbaren Versionen: [GitHub Releases](https://github.com/Sternrassler/eve-sde/releases)
-
-### SDE Download
-
-Das Download-Script lädt automatisch die neueste Version der EVE SDE:
-
-```bash
-./scripts/download-sde.sh
-```
-
-**Hinweis:** Die heruntergeladenen Daten werden in `data/` gespeichert und sind durch `.gitignore` vom Versionskontrollsystem ausgeschlossen.
-
-### Datenformate
-
-- **JSONL** (`data/jsonl/`): 52 Dateien, ~499 MB - JSON Lines Format für Streaming
-- **YAML** (`data/yaml/`): 52 Dateien, ~160 MB - Human-readable Format
-- **SQLite** (`data/sqlite/eve-sde.db`): 41 Tabellen, ~405 MB - Optimierte Datenbank
-  - Primary Keys auf allen `_key` Feldern
-  - Indices auf Foreign Keys
-  - LocalizedText als JSON TEXT (8 Sprachen)
-  - Reflection-basiertes Schema (type-safe)
-
-### Architektur
-
-**Schema-Generator** (`cmd/sde-schema-gen`):
-
-- Analysiert JSONL-Dateien statistisch
-- Generiert Go-Structs mit JSON-Tags
-- Type Inference: NULL-Handling, int64/float64 Harmonisierung
-- LocalizedText-Erkennung über Feldnamen-Pattern
-
-**SQLite-Importer** (`cmd/sde-to-sqlite`):
-
-- DDL-Generator via Reflection (Go struct → CREATE TABLE)
-- Streaming JSONL-Parser mit `bufio.Scanner`
-- Batch-Inserts (1000 Zeilen/Batch)
-- SQLite-Optimierungen: WAL mode, PRAGMA tuning
-- Type Conversion: bool→INTEGER, complex→JSON
+Alle Releases: [github.com/Sternrassler/eve-sde/releases](https://github.com/Sternrassler/eve-sde/releases)
 
 ## Entwicklung
 
-### Build
-
 ```bash
-# Schema-Generator
-go build ./cmd/sde-schema-gen
+# Pre-Commit Hooks aktivieren
+git config core.hooksPath .githooks
 
-# SQLite-Importer
+# Tests
+go test ./...
+
+# Lokaler Build
 go build ./cmd/sde-to-sqlite
 ```
 
-### Tests
+**Engineering-Richtlinien:**
 
-```bash
-# Schema-Generator Tests
-go test ./internal/sqlite/schema/... -v
+- TDD (Test-Driven Development)
+- ADRs für Architektur-Entscheidungen
+- Normative Standards (MUST/SHOULD/MAY)
 
-# Alle Tests
-go test ./... -v
-```
-
-### Engineering-Richtlinien
-
-Das Projekt folgt strikten Engineering-Prinzipien:
-
-- **TDD**: Tests vor Implementierung (Red → Green → Refactor)
-- **Git-Workflow**: Issue → Branch → PR → Review → Merge
-- **Normative Standards**: MUST/SHOULD/MAY nach RFC 2119
-- **ADRs**: Architekturentscheidungen dokumentiert in `docs/adr/`
-- **Pre-Commit Hooks**: Normative Checks, ADR-Validierung, Secret-Scanning
-
-Details siehe [`.github/copilot-instructions.md`](.github/copilot-instructions.md)
+Details: [.github/copilot-instructions.md](.github/copilot-instructions.md)
 
 ## Lizenz
 
-Dieses Projekt steht unter der [MIT-Lizenz](LICENSE).
+[MIT License](LICENSE) - Freie Nutzung für alle EVE-bezogenen Projekte.
+
+---
+
+**Hinweis:** Dieses Projekt ist nicht offiziell von CCP Games endorsed. EVE Online und alle zugehörigen Logos sind Marken von CCP hf.
