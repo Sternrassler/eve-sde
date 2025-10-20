@@ -27,8 +27,8 @@ go run ./cmd/sde-schema-gen \
   -lines 100 \
   -v
 
-# Or via wrapper script
-./scripts/fetch-schemas.sh --refresh -v
+# Or via sync pipeline (recommended)
+make sync
 ```
 
 ### Options
