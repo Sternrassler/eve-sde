@@ -17,7 +17,7 @@ Dieses Projekt dient der:
 
 ## Projektstatus
 
-**v0.1.0** – SQLite-Datenbank Implementation abgeschlossen.
+**v0.1.0** – SQLite-Datenbank & Sync-Automatisierung abgeschlossen.
 
 ### Fertiggestellt
 
@@ -28,13 +28,21 @@ Dieses Projekt dient der:
   - Streaming JSONL-Importer mit Batch-Processing
   - CLI-Tool: `sde-to-sqlite`
   - Performance: 500k Zeilen in 24s, 405 MB DB
+- ✅ Version Tracking System
+  - CCP API Integration (Build-Nummer & Release-Datum)
+  - Intelligente Update-Erkennung
+  - CLI-Flags: `--check-version`, `--skip-if-current`
+- ✅ Sync-Pipeline Automatisierung
+  - CLI-Tool: `sde-sync` (orchestriert Download → Schema → Import)
+  - Makefile Targets: `make sync`, `make sync-force`
+  - Version-basiertes Skip-Verhalten
 
 ### Nächste Schritte
 
-- [ ] Sync-Automatisierung (Download → Schema-Gen → Import Pipeline)
 - [ ] YAML-Import für nested Strukturen
 - [ ] Diff/Update Mechanismus (nur Änderungen importieren)
 - [ ] Progress Tracking & Verbose Logging
+- [ ] Scheduled Sync (Cron/Systemd Timer Beispiele)
 
 ## Struktur
 
@@ -42,13 +50,16 @@ Dieses Projekt dient der:
 eve-sde/
 ├── cmd/
 │   ├── sde-schema-gen/      # Schema-Generator CLI
-│   └── sde-to-sqlite/       # SQLite-Import CLI
+│   ├── sde-to-sqlite/       # SQLite-Import CLI
+│   └── sde-sync/            # Sync-Pipeline Orchestrator (NEW)
 ├── internal/
 │   ├── schema/
 │   │   └── types/           # 53 generierte Go-Structs
-│   └── sqlite/
-│       ├── schema/          # DDL-Generator
-│       └── importer/        # JSONL→SQLite Importer
+│   ├── sqlite/
+│   │   ├── schema/          # DDL-Generator
+│   │   └── importer/        # JSONL→SQLite Importer
+│   └── sde/
+│       └── version/         # Version Tracking (NEW)
 ├── data/                    # Lokale SDE-Kopien (gitignored)
 │   ├── jsonl/               # 52 JSONL-Dateien (~499 MB)
 │   ├── yaml/                # 52 YAML-Dateien (~160 MB)
@@ -130,7 +141,16 @@ go run ./cmd/sde-schema-gen
 Importiert alle JSONL-Daten in eine SQLite-Datenbank:
 
 ```bash
-# Full Import (alle 41 Schemas)
+# Vollautomatischer Sync (Version Check → Download → Schema → Import)
+make sync
+
+# Erzwinge Update (auch wenn DB aktuell)
+make sync-force
+
+# Nur Download + Schema (kein SQLite Import)
+make sync-download-only
+
+# Manueller Full Import (alle 41 Schemas)
 go run ./cmd/sde-to-sqlite
 
 # Einzeltabelle
@@ -138,6 +158,12 @@ go run ./cmd/sde-to-sqlite --import types
 
 # Custom DB-Pfad
 go run ./cmd/sde-to-sqlite --db custom/eve.db --jsonl data/jsonl
+
+# Version prüfen
+go run ./cmd/sde-to-sqlite --check-version
+
+# Nur bei Update importieren
+go run ./cmd/sde-to-sqlite --skip-if-current
 
 # Nur Schema erstellen (ohne Daten)
 go run ./cmd/sde-to-sqlite --init

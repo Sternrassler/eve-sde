@@ -1,7 +1,7 @@
 # Makefile – Zentrale Orchestrierung für Projekt-Automationen
 # Referenz: copilot-instructions.md Abschnitt 3.1
 
-.PHONY: help test lint lint-ci adr-ref commit-lint release-check security-blockers scan scan-json pr-check release ci-local clean ensure-trivy push-ci pr-quality-gates-ci
+.PHONY: help test lint lint-ci adr-ref commit-lint release-check security-blockers scan scan-json pr-check release ci-local clean ensure-trivy push-ci pr-quality-gates-ci sync
 
 # Standardwerte
 TRIVY_FAIL_ON ?= HIGH,CRITICAL
@@ -13,6 +13,15 @@ help: ## Zeigt verfügbare Targets
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
+
+sync: ## Vollständiger SDE-Sync (Download → Schema-Gen → SQLite Import)
+	@go run ./cmd/sde-sync
+
+sync-force: ## Force Sync (ignoriert Versionsprüfung)
+	@go run ./cmd/sde-sync --force
+
+sync-download-only: ## Nur Download + Schema-Gen (kein SQLite Import)
+	@go run ./cmd/sde-sync --skip-import
 
 test: ## Führt die definierte Test-Suite aus (Platzhalter)
 	@echo "[make test] Keine Tests konfiguriert – bitte projektspezifische Testbefehle ergänzen"

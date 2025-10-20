@@ -11,6 +11,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Version Tracking System** (`internal/sde/version`)
+  - Integration mit CCP Developer API (`https://developers.eveonline.com/static-data/tranquility/latest.jsonl`)
+  - `GetLatestVersion()`: HTTP-basierter Abruf von Build-Nummer & Release-Datum
+  - `GetLocalVersion()`: SQLite-basierte Abfrage der lokal importierten Version aus `_sde` Tabelle
+  - `NeedsUpdate()`: Intelligenter Vergleich via Build-Nummer (latest > local)
+  - Graceful Degradation bei fehlender Datenbank/Tabelle (nil statt Fehler)
+  - CLI-Flags für `sde-to-sqlite`: `--check-version`, `--skip-if-current`
+  - Umfangreiche Test-Suite (4 Tests, inkl. Integration Test mit CCP API)
+
+- **Sync-Pipeline Automatisierung** (`cmd/sde-sync`)
+  - Vollautomatischer Workflow: Version Check → Download → Schema-Generierung → SQLite-Import
+  - CLI-Flags:
+    - `--force`: Erzwinge Update (auch wenn DB aktuell)
+    - `--skip-import`: Nur Download + Schema-Generierung (kein SQLite)
+    - `-v`: Verbose Logging (stdout von Subprozessen)
+    - `--data`: Custom Basis-Verzeichnis
+  - Intelligentes Skip-Verhalten: Überspringt Pipeline wenn DB auf aktuellem Stand
+  - Makefile Targets:
+    - `make sync`: Intelligenter Sync (nur bei Update)
+    - `make sync-force`: Erzwinge vollständigen Sync
+    - `make sync-download-only`: Nur Download + Schema
+  - Timing & Progress-Reporting (Gesamtdauer wird angezeigt)
+  - Fehlerbehandlung: Warnings für nicht-kritische Fehler, Fatal für kritische
+  - Dokumentation in `cmd/sde-sync/README.md`:
+    - Workflow-Diagramm
+    - Automation-Beispiele (cron, systemd timer)
+    - Error-Handling-Dokumentation
+
 - **SQLite Database Implementation** (Complete Pipeline)
   - Reflection-based schema generator (`internal/sqlite/schema`)
     - `GenerateTable()`: Go struct → CREATE TABLE DDL
