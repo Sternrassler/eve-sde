@@ -196,15 +196,11 @@ func TestGetLocalVersion_WithData(t *testing.T) {
 
 func TestSDEVersion_Comparison(t *testing.T) {
 	v1 := &SDEVersion{
-		Key:         "sde",
 		BuildNumber: 100,
-		ReleaseDate: time.Now(),
 	}
 
 	v2 := &SDEVersion{
-		Key:         "sde",
 		BuildNumber: 200,
-		ReleaseDate: time.Now(),
 	}
 
 	// NeedsUpdate Logic Simulation

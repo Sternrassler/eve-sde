@@ -80,8 +80,8 @@ func main() {
 
 	// Calculate travel time
 	params := &navigation.NavigationParams{
-		WarpSpeed:   &(*warpSpeed),
-		AlignTime:   &(*alignTime),
+		WarpSpeed:   warpSpeed,
+		AlignTime:   alignTime,
 		AvoidLowSec: *avoidLowSec,
 	}
 
