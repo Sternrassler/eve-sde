@@ -110,7 +110,7 @@ Comprehensive 10KB+ documentation including:
 - Known routes validation
 - Limitations and future enhancements
 
-### Example Program (`examples/navigation_example.go`)
+### Example Program (`examples/navigation/main.go`)
 Fully functional CLI demonstration with:
 - Multiple command-line flags
 - Automatic view initialization
@@ -139,7 +139,7 @@ User-friendly guide with:
 3. `internal/sqlite/navigation/navigation_test.go` - Unit tests
 4. `internal/sqlite/navigation/integration_test.go` - Integration tests
 5. `docs/navigation.md` - Complete navigation documentation
-6. `examples/navigation_example.go` - Example program
+6. `examples/navigation/main.go` - Example program
 7. `examples/README.md` - Example documentation
 
 ### Modified Files (3 total)

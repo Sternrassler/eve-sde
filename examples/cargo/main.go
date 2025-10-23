@@ -17,15 +17,15 @@ import (
 func main() {
 	// Command line flags
 	var (
-		dbPath             = flag.String("db", "data/sqlite/eve-sde.db", "Path to SQLite database")
-		shipTypeID         = flag.Int64("ship", 648, "Ship type ID (default: Badger)")
-		itemTypeID         = flag.Int64("item", 34, "Item type ID (default: Tritanium)")
-		racialHaulerLevel  = flag.Int("racial-hauler", -1, "Racial Hauler skill level (0-5, -1 for none)")
-		freighterLevel     = flag.Int("freighter", -1, "Freighter skill level (0-5, -1 for none)")
-		miningBargeLevel   = flag.Int("mining-barge", -1, "Mining Barge skill level (0-5, -1 for none)")
-		cargoMultiplier    = flag.Float64("cargo-mult", -1, "Custom cargo multiplier (e.g. 1.5 for +50%)")
-		showShipInfo       = flag.Bool("ship-info", false, "Show detailed ship capacity information")
-		initViews          = flag.Bool("init-views", false, "Initialize cargo views and exit")
+		dbPath            = flag.String("db", "data/sqlite/eve-sde.db", "Path to SQLite database")
+		shipTypeID        = flag.Int64("ship", 648, "Ship type ID (default: Badger)")
+		itemTypeID        = flag.Int64("item", 34, "Item type ID (default: Tritanium)")
+		racialHaulerLevel = flag.Int("racial-hauler", -1, "Racial Hauler skill level (0-5, -1 for none)")
+		freighterLevel    = flag.Int("freighter", -1, "Freighter skill level (0-5, -1 for none)")
+		miningBargeLevel  = flag.Int("mining-barge", -1, "Mining Barge skill level (0-5, -1 for none)")
+		cargoMultiplier   = flag.Float64("cargo-mult", -1, "Custom cargo multiplier (e.g. 1.5 for +50%)")
+		showShipInfo      = flag.Bool("ship-info", false, "Show detailed ship capacity information")
+		initViews         = flag.Bool("init-views", false, "Initialize cargo views and exit")
 	)
 	flag.Parse()
 
@@ -130,7 +130,7 @@ func main() {
 	// Show example comparison
 	if !result.SkillsApplied {
 		fmt.Printf("\n💡 Tip: Use --racial-hauler 5 to see the effect of skills!\n")
-		fmt.Printf("   Example: go run examples/cargo_calculator.go --ship %d --item %d --racial-hauler 5\n",
+		fmt.Printf("   Example: go run examples/cargo/main.go --ship %d --item %d --racial-hauler 5\n",
 			*shipTypeID, *itemTypeID)
 	}
 }

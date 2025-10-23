@@ -29,7 +29,7 @@ sqlite3 eve-sde.db "SELECT name FROM types WHERE _key = 34;"
 
 ```bash
 # Go-API Beispiel (optional)
-go run examples/navigation_example.go
+go run examples/navigation/main.go
 # Jita → Amarr: 40 jumps in 273µs
 ```
 
@@ -56,13 +56,13 @@ Vollständiges Cargo-Berechnungssystem für Hauling und Trade:
 
 ```bash
 # Basis-Berechnung (ohne Skills)
-go run examples/cargo_calculator.go --ship 648 --item 34
+go run examples/cargo/main.go --ship 648 --item 34
 
 # Mit Gallente Hauler V (+25% Cargo)
-go run examples/cargo_calculator.go --ship 648 --item 34 --racial-hauler 5
+go run examples/cargo/main.go --ship 648 --item 34 --racial-hauler 5
 
 # Schiffs-Kapazitäten anzeigen
-go run examples/cargo_calculator.go --ship 648 --ship-info
+go run examples/cargo/main.go --ship 648 --ship-info
 ```
 
 **Go API:**

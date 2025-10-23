@@ -269,32 +269,30 @@ effective := cargo.ApplySkillModifiers(baseCapacity, skills, "cargo")
 
 ## Command Line Tool
 
-The `cargo_calculator.go` example provides a command-line interface.
+The `cargo/main.go` example provides a command-line interface.
 
 ### Basic Usage
 
 ```bash
-# Calculate cargo fit (default: Badger with Tritanium)
-go run examples/cargo_calculator.go
+# Default: Badger + Tritanium (no skills)
+go run examples/cargo/main.go
 
-# Specific ship and item
-go run examples/cargo_calculator.go --ship 648 --item 34
+# Custom ship and item
+go run examples/cargo/main.go --ship 648 --item 34
 
-# With Racial Hauler V
-go run examples/cargo_calculator.go --ship 648 --item 34 --racial-hauler 5
+# With Gallente Hauler V (+25%)
+go run examples/cargo/main.go --ship 648 --item 34 --racial-hauler 5
 
-# With multiple skills
-go run examples/cargo_calculator.go \
+# Multiple skills
+go run examples/cargo/main.go \
     --ship 648 \
     --item 34 \
     --racial-hauler 5 \
     --cargo-mult 1.1
 
-# Show detailed ship information
-go run examples/cargo_calculator.go --ship 648 --ship-info
+# Show ship info
+go run examples/cargo/main.go --ship 648 --ship-info
 ```
-
-### Available Flags
 
 | Flag | Type | Description |
 |------|------|-------------|
