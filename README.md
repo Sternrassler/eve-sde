@@ -28,9 +28,8 @@ sqlite3 eve-sde.db "SELECT name FROM types WHERE _key = 34;"
 ### Navigation System
 
 ```bash
-# Go-API Beispiel (optional)
-go run examples/navigation/main.go
-# Jita → Amarr: 40 jumps in 273µs
+# Hinweis: Navigation API wurde nach eve-o-provit migriert
+# Siehe: github.com/Sternrassler/eve-o-provit/backend/pkg/evedb/navigation
 ```
 
 **Features:**
@@ -40,47 +39,23 @@ go run examples/navigation/main.go
 - Security Filtering (High-Sec only Routes)
 - Trade Hub Analysis (Jita, Amarr, Dodixie, Rens, Hek)
 
-Details: [docs/navigation.md](docs/navigation.md)
+Details: [docs/navigation.md](docs/navigation.md) (Legacy-Dokumentation)
 
-### Cargo & Hauling API (NEU in v0.2.0)
+### Cargo & Hauling API (MIGRIERT)
 
-Vollständiges Cargo-Berechnungssystem für Hauling und Trade:
+**Hinweis:** Die Cargo API wurde nach **eve-o-provit** migriert.
+
+Siehe: [github.com/Sternrassler/eve-o-provit](https://github.com/Sternrassler/eve-o-provit/tree/main/backend/pkg/evedb/cargo)
+
+**Features:**
 
 - **Item Volumes**: Volumen-Informationen und ISK/m³ Value-Density
 - **Ship Capacities**: Cargo-Holds (Cargo, Ore Hold, Fleet Hangar)
-- **Skill System**: Racial Hauler, Freighter, Mining Barge Skills (optional)
+- **Skill System**: Racial Hauler, Freighter Skills (optional)
 - **Cargo Fit Calculation**: Wieviele Items passen in Schiff?
 - **Route Security**: System-Security-Analyse für sichere Routen
 
-**Beispiel:**
-
-```bash
-# Basis-Berechnung (ohne Skills)
-go run examples/cargo/main.go --ship 648 --item 34
-
-# Mit Gallente Hauler V (+25% Cargo)
-go run examples/cargo/main.go --ship 648 --item 34 --racial-hauler 5
-
-# Schiffs-Kapazitäten anzeigen
-go run examples/cargo/main.go --ship 648 --ship-info
-```
-
-**Go API:**
-
-```go
-import "github.com/Sternrassler/eve-sde/pkg/evedb/cargo"
-
-// Ohne Skills (Basis-Werte)
-result, _ := cargo.CalculateCargoFit(db, 648, 34, nil)
-// Mit Skills
-racialLevel := 5
-skills := &cargo.SkillModifiers{RacialHaulerLevel: &racialLevel}
-result, _ := cargo.CalculateCargoFit(db, 648, 34, skills)
-fmt.Printf("Effective: %.0f m³ (+%.0f%%)\n", 
-    result.EffectiveCapacity, result.SkillBonus)
-```
-
-Siehe [docs/cargo-api.md](docs/cargo-api.md) für vollständige API-Dokumentation.
+Legacy-Dokumentation: [docs/cargo-api.md](docs/cargo-api.md)
 
 ## Architektur
 
@@ -97,23 +72,21 @@ eve-sde/
 │   │   ├── importer/        # JSONL Streaming Importer
 │   │   └── views/           # SQL Views (Navigation, Cargo, Stats)
 │   └── schema/types/        # 53 Go Structs (generiert)
-├── pkg/evedb/               # Optional: Go APIs
-│   ├── navigation/          # Navigation API (Pathfinding, Travel Time)
-│   └── cargo/               # Cargo API (Hauling, Capacity Calculations)
 ├── data/                    # Lokale Daten (gitignored)
 │   └── sqlite/eve-sde.db    # **HAUPTPRODUKT**
 └── docs/                    # Technische Dokumentation
     ├── adr/                 # Architektur-Entscheidungen
-    ├── navigation.md        # Navigation System Docs
-    └── cargo-api.md         # Cargo & Hauling API Docs
+    ├── navigation.md        # Navigation System Docs (Legacy)
+    └── cargo-api.md         # Cargo API Docs (Legacy)
 ```
 
 **Nutzung:**
 
 - **Direkt:** SQLite-DB via `sqlite3` CLI oder Bibliotheken (Python, Node.js, etc.)
-- **Go API:** Optional via `pkg/evedb/navigation` oder `pkg/evedb/cargo` (Convenience Layer)
+- **Go API:** Migriert nach [eve-o-provit](https://github.com/Sternrassler/eve-o-provit) (Navigation & Cargo)
 
-Details: [docs/adr/ADR-001-db-core-api-separation.md](docs/adr/ADR-001-db-core-api-separation.md)
+**Hinweis:** Die `pkg/evedb/` Go-APIs wurden nach `eve-o-provit/backend/pkg/evedb/` migriert.
+Dieses Repository fokussiert sich auf die SQLite-Datenbank-Generierung.
 
 ## Lokaler Build (Optional)
 

@@ -178,6 +178,16 @@ func main() {
 		}
 	}
 
+	// Initialize cargo views if we imported types/dogma data
+	if *importTable == "" || *importTable == "types" || *importTable == "typeDogma" {
+		log.Println("Initializing cargo views...")
+		if err := views.InitializeCargoViews(imp.DB()); err != nil {
+			log.Printf("Warning: Failed to initialize cargo views: %v", err)
+		} else {
+			log.Println("✓ Cargo views initialized")
+		}
+	}
+
 	log.Println("✓ Import completed successfully")
 }
 

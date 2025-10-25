@@ -7,48 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- **Cargo & Hauling Calculation API** (`pkg/evedb/cargo/`)
-  - Go API für Cargo-Berechnungen, Item-Volumen, Schiffs-Kapazitäten
-  - SQL Views: `v_item_volumes`, `v_ship_cargo_capacities`, `v_route_security_analysis`
-  - Skill-System: Racial Hauler, Freighter, Mining Barge Skills (optionale Parameter)
-  - Funktionen: `GetItemVolume()`, `GetShipCapacities()`, `CalculateCargoFit()`
-  - Skill-Modifikatoren: +5% pro Level, kombinierbar
-  - Test Coverage: 93.1%
-  - Beispiel-Programm: `examples/cargo/main.go`
-  - Dokumentation: `docs/cargo-api.md`
-
-- **Navigation & Intelligence System** (`pkg/evedb/navigation/`)
-  - Go API für Pathfinding, Travel Time Berechnung, Security Filtering
-  - SQL Views: `v_stargate_graph`, `v_system_info`, `v_system_security_zones`, `v_region_stats`, `v_trade_hubs`
-  - Performance: Kurze Routen (<10 Jumps) in <100ms
-  - Beispiel-Programm: `examples/navigation/main.go`
-
-### Changed
-
-- **Architektur-Refactoring: DB-Core vs. API Layer Separation** (ADR-001)
-  - Navigation API verschoben: `internal/sqlite/navigation/` → `pkg/evedb/navigation/`
-  - SQL Views extrahiert: `internal/sqlite/views/` (DB-Core)
-  - Rationale: SQLite-Datenbank ist Kernprodukt, Go APIs sind optionale Convenience Layer
-  - Ermöglicht externe Nutzung der API ohne Exposition interner DB-Implementierung
-
-### Fixed
-
-- View-Schema: `v_system_info` nutzt korrektes Feld (`_key` statt `solarSystemID`)
+## [0.2.0] - 2025-10-25
 
 ### Removed
 
-- Workflow: `.github/workflows/issue-dependency-enforcement.yml` (nicht genutzt)
+- **Go APIs migriert nach eve-o-provit**
+  - `pkg/evedb/cargo/` → `eve-o-provit/backend/pkg/evedb/cargo/`
+  - `pkg/evedb/navigation/` → `eve-o-provit/backend/pkg/evedb/navigation/`
+  - `examples/cargo/` → `eve-o-provit/backend/examples/cargo/`
+  - `examples/navigation/` → `eve-o-provit/backend/examples/navigation/`
+  - Verzeichnisse komplett entfernt (inkl. Tests und Benchmarks)
+  - Siehe: https://github.com/Sternrassler/eve-o-provit
 
-### Known Issues
+### Changed
 
-- Performance: Lange Routen (40+ Jumps) haben O(n³) Komplexität wegen JSON-basierter Cycle-Detection (Issue #3)
+- **Fokus-Verschiebung: eve-sde ist jetzt primär SQLite-Datenbank-Generator**
+  - Go-APIs nach eve-o-provit migriert
+  - SQL Views bleiben als Teil der Datenbank erhalten
+  - README aktualisiert mit Migration-Hinweisen
+  - Dokumentation (`docs/cargo-api.md`, `docs/navigation.md`) als Legacy-Referenz erhalten
+
+- **Cargo Views Integration**
+  - Cargo SQL Views jetzt Teil des Standard-Builds
+  - `v_item_volumes`: Item-Volumen und ISK/m³ Wert-Dichte
+  - `v_ship_cargo_capacities`: Basis-Schiffskapazitäten
+  - `v_route_security_analysis`: System-Security-Analyse
+  - Views werden automatisch bei `make sync` erstellt
 
 ### Added
 
-- **Automatisches Release-System** (GitHub Actions)
-  - Workflow `.github/workflows/sync-sde-release.yml`
+- **8 SQL Views** (5 Navigation + 3 Cargo)
+  - Navigation: `v_stargate_graph`, `v_system_info`, `v_system_security_zones`, `v_region_stats`, `v_trade_hubs`
+  - Cargo: `v_item_volumes`, `v_ship_cargo_capacities`, `v_route_security_analysis`
+
+### Fixed
+
+- Cargo View Definitionen vereinfacht (entfernte nicht-existierende Felder)
+- View-Initialisierung in Import-Pipeline korrigiert
   - Täglicher Cron-Job (03:00 UTC) prüft auf neue SDE-Versionen
   - Bei Update: Automatischer Build und GitHub Release
   - Release-Tag Format: `sde-v{buildNumber}-{datum}` (z.B. `sde-v3064089-2025-10-17`)
