@@ -6,6 +6,12 @@
 # Data directories (local SDE copies)
 /data/
 
+# SQLite runtime files
+*.db
+*.db-shm
+*.db-wal
+*.db-gz
+
 # Example output files
 route_result.json
 
