@@ -28,5 +28,25 @@ if git diff --cached --name-only | xargs grep -HnE "(password|secret|api[_-]?key
     # Nicht blockieren, nur Warnung
 fi
 
+# 5. Go vet
+echo "[pre-commit] Running go vet..."
+go vet ./... || { echo "[pre-commit] ❌ go vet fehlgeschlagen"; exit 1; }
+
+# 6. golangci-lint (nur geänderte Files, schnell)
+if command -v golangci-lint &>/dev/null; then
+    echo "[pre-commit] Running golangci-lint..."
+    LINT_OUT=$(golangci-lint run --new-from-rev=HEAD~1 --timeout=3m 2>&1) || {
+        if echo "$LINT_OUT" | grep -q "Go language version.*lower than the targeted"; then
+            echo "[pre-commit] ⚠️  golangci-lint übersprungen (Go-Version inkompatibel — bitte golangci-lint aktualisieren)"
+        else
+            echo "$LINT_OUT"
+            echo "[pre-commit] ❌ golangci-lint fehlgeschlagen"
+            exit 1
+        fi
+    }
+else
+    echo "[pre-commit] ⚠️  golangci-lint nicht gefunden, übersprungen"
+fi
+
 echo "[pre-commit] ✅ Pre-Commit Checks erfolgreich"
 exit 0
