@@ -10,32 +10,33 @@ type NpcCorporations struct {
 	AllowedMemberRaces []int64 `json:"allowedMemberRaces,omitempty"`
 	CeoID int64 `json:"ceoID,omitempty"`
 	CorporationTrades []map[string]interface{} `json:"corporationTrades,omitempty"`
-	Deleted bool `json:"deleted,omitempty"`
+	Deleted bool `json:"deleted"`
 	Description LocalizedText `json:"description,omitempty"`
 	Divisions []map[string]interface{} `json:"divisions,omitempty"`
 	EnemyID int64 `json:"enemyID,omitempty"`
-	Extent string `json:"extent,omitempty"`
+	ExchangeRates []map[string]interface{} `json:"exchangeRates,omitempty"`
+	Extent string `json:"extent"`
 	FactionID int64 `json:"factionID,omitempty"`
 	FriendID int64 `json:"friendID,omitempty"`
-	HasPlayerPersonnelManager bool `json:"hasPlayerPersonnelManager,omitempty"`
+	HasPlayerPersonnelManager bool `json:"hasPlayerPersonnelManager"`
 	IconID int64 `json:"iconID,omitempty"`
-	InitialPrice int64 `json:"initialPrice,omitempty"`
+	InitialPrice int64 `json:"initialPrice"`
 	Investors []map[string]interface{} `json:"investors,omitempty"`
 	LpOfferTables []int64 `json:"lpOfferTables,omitempty"`
 	MainActivityID int64 `json:"mainActivityID,omitempty"`
-	MemberLimit int64 `json:"memberLimit,omitempty"`
-	MinSecurity int64 `json:"minSecurity,omitempty"`
-	MinimumJoinStanding int64 `json:"minimumJoinStanding,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
+	MemberLimit int64 `json:"memberLimit"`
+	MinSecurity int64 `json:"minSecurity"`
+	MinimumJoinStanding int64 `json:"minimumJoinStanding"`
+	Name LocalizedText `json:"name"`
 	RaceID int64 `json:"raceID,omitempty"`
 	SecondaryActivityID int64 `json:"secondaryActivityID,omitempty"`
-	SendCharTerminationMessage bool `json:"sendCharTerminationMessage,omitempty"`
-	Shares int64 `json:"shares,omitempty"`
-	Size string `json:"size,omitempty"`
+	SendCharTerminationMessage bool `json:"sendCharTerminationMessage"`
+	Shares int64 `json:"shares"`
+	Size string `json:"size"`
 	SizeFactor float64 `json:"sizeFactor,omitempty"`
 	SolarSystemID int64 `json:"solarSystemID,omitempty"`
 	StationID int64 `json:"stationID,omitempty"`
-	TaxRate float64 `json:"taxRate,omitempty"`
-	TickerName string `json:"tickerName,omitempty"`
-	UniqueName bool `json:"uniqueName,omitempty"`
+	TaxRate float64 `json:"taxRate"`
+	TickerName string `json:"tickerName"`
+	UniqueName bool `json:"uniqueName"`
 }

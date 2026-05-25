@@ -7,7 +7,7 @@ package types
 // Blueprints represents the schema for blueprints.jsonl
 type Blueprints struct {
 	Key int64 `json:"_key"`
-	Activities map[string]interface{} `json:"activities,omitempty"`
-	BlueprintTypeID int64 `json:"blueprintTypeID,omitempty"`
-	MaxProductionLimit int64 `json:"maxProductionLimit,omitempty"`
+	Activities map[string]interface{} `json:"activities"`
+	BlueprintTypeID int64 `json:"blueprintTypeID"`
+	MaxProductionLimit int64 `json:"maxProductionLimit"`
 }

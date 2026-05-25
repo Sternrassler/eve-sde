@@ -8,16 +8,20 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 
 	"github.com/Sternrassler/eve-sde/cmd/sde-schema-gen/generator"
+	"github.com/Sternrassler/eve-sde/internal/registry"
 )
 
 func main() {
 	var (
-		inputDir  = flag.String("input", "data/jsonl", "JSONL Input-Verzeichnis")
-		outputDir = flag.String("output", "internal/schema/types", "Go Output-Verzeichnis")
-		verbose   = flag.Bool("v", false, "Verbose Logging")
-		maxLines  = flag.Int("lines", 0, "Max JSONL Zeilen pro Schema-Analyse (0 = gesamte Datei)")
+		inputDir    = flag.String("input", "data/jsonl", "JSONL Input-Verzeichnis")
+		outputDir   = flag.String("output", "internal/schema/types", "Go Output-Verzeichnis")
+		verbose     = flag.Bool("v", false, "Verbose Logging")
+		maxLines    = flag.Int("lines", 0, "Max JSONL Zeilen pro Schema-Analyse (0 = gesamte Datei)")
+		registryDir = flag.String("registry", "internal/registry", "Output-Verzeichnis für mappings_gen.go")
 	)
 	flag.Parse()
 
@@ -56,11 +60,13 @@ func main() {
 
 	// Verarbeite jede JSONL-Datei
 	successCount := 0
+	var entries []generator.MappingEntry
 	for _, file := range files {
-		schemaName := generator.FileNameToTypeName(filepath.Base(file))
+		base := filepath.Base(file)
+		schemaName := generator.FileNameToTypeName(base)
 
 		if *verbose {
-			log.Printf("Analyzing %s...", filepath.Base(file))
+			log.Printf("Analyzing %s...", base)
 		}
 
 		// Analysiere Schema
@@ -72,7 +78,7 @@ func main() {
 
 		// Generiere Go-Code
 		outputFile := filepath.Join(*outputDir, fmt.Sprintf("%s.go", generator.TypeNameToFileName(schemaName)))
-		if err := generator.WriteGoFile(outputFile, schemaName, schema, filepath.Base(file)); err != nil {
+		if err := generator.WriteGoFile(outputFile, schemaName, schema, base); err != nil {
 			log.Printf("WARNUNG: Konnte %s nicht schreiben: %v", outputFile, err)
 			continue
 		}
@@ -81,8 +87,33 @@ func main() {
 			log.Printf("✓ Generated %s", outputFile)
 		}
 		successCount++
+
+		// Registry-Eintrag sammeln (Ausschlüsse respektieren)
+		name := strings.TrimSuffix(base, ".jsonl")
+		if reason, excluded := registry.ExcludedDatasets[name]; excluded {
+			log.Printf("⊘ Registry: %s ausgeschlossen (%s)", name, reason)
+			continue
+		}
+		indices, hasOverride := registry.IndexOverrides[name]
+		if !hasOverride {
+			indices = generator.DeriveIndices(schema)
+		}
+		entries = append(entries, generator.MappingEntry{
+			Name:      name,
+			JSONLFile: base,
+			TypeName:  schemaName,
+			Indices:   indices,
+		})
 	}
 
 	log.Printf("✓ %d von %d Schema-Dateien generiert", successCount, len(files))
 	log.Printf("Schemas gespeichert in: %s", *outputDir)
+
+	// Mappings-Registry generieren (stabil nach Name sortiert)
+	sort.Slice(entries, func(i, j int) bool { return entries[i].Name < entries[j].Name })
+	mappingsPath := filepath.Join(*registryDir, "mappings_gen.go")
+	if err := generator.WriteMappingsFile(mappingsPath, "registry", entries); err != nil {
+		log.Fatalf("Konnte Mappings nicht generieren: %v", err)
+	}
+	log.Printf("✓ Generated %s (%d Einträge)", mappingsPath, len(entries))
 }

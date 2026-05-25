@@ -8,6 +8,6 @@ package types
 type Categories struct {
 	Key int64 `json:"_key"`
 	IconID int64 `json:"iconID,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
-	Published bool `json:"published,omitempty"`
+	Name LocalizedText `json:"name"`
+	Published bool `json:"published"`
 }

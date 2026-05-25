@@ -8,9 +8,9 @@ package types
 type MapConstellations struct {
 	Key int64 `json:"_key"`
 	FactionID int64 `json:"factionID,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
-	Position map[string]interface{} `json:"position,omitempty"`
-	RegionID int64 `json:"regionID,omitempty"`
-	SolarSystemIDs []int64 `json:"solarSystemIDs,omitempty"`
+	Name LocalizedText `json:"name"`
+	Position map[string]interface{} `json:"position"`
+	RegionID int64 `json:"regionID"`
+	SolarSystemIDs []int64 `json:"solarSystemIDs"`
 	WormholeClassID int64 `json:"wormholeClassID,omitempty"`
 }

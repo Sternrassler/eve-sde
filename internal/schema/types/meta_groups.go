@@ -11,5 +11,5 @@ type MetaGroups struct {
 	Description LocalizedText `json:"description,omitempty"`
 	IconID int64 `json:"iconID,omitempty"`
 	IconSuffix string `json:"iconSuffix,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
+	Name LocalizedText `json:"name"`
 }

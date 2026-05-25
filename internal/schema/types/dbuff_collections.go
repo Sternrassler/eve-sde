@@ -7,13 +7,13 @@ package types
 // DbuffCollections represents the schema for dbuffCollections.jsonl
 type DbuffCollections struct {
 	Key int64 `json:"_key"`
-	AggregateMode string `json:"aggregateMode,omitempty"`
-	DeveloperDescription string `json:"developerDescription,omitempty"`
+	AggregateMode string `json:"aggregateMode"`
+	DeveloperDescription string `json:"developerDescription"`
 	DisplayName LocalizedText `json:"displayName,omitempty"`
 	ItemModifiers []map[string]interface{} `json:"itemModifiers,omitempty"`
 	LocationGroupModifiers []map[string]interface{} `json:"locationGroupModifiers,omitempty"`
 	LocationModifiers []map[string]interface{} `json:"locationModifiers,omitempty"`
 	LocationRequiredSkillModifiers []map[string]interface{} `json:"locationRequiredSkillModifiers,omitempty"`
-	OperationName string `json:"operationName,omitempty"`
-	ShowOutputValueInUI string `json:"showOutputValueInUI,omitempty"`
+	OperationName string `json:"operationName"`
+	ShowOutputValueInUI string `json:"showOutputValueInUI"`
 }

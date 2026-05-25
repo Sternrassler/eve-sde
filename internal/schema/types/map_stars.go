@@ -7,8 +7,8 @@ package types
 // MapStars represents the schema for mapStars.jsonl
 type MapStars struct {
 	Key int64 `json:"_key"`
-	Radius int64 `json:"radius,omitempty"`
-	SolarSystemID int64 `json:"solarSystemID,omitempty"`
-	Statistics map[string]interface{} `json:"statistics,omitempty"`
-	TypeID int64 `json:"typeID,omitempty"`
+	Radius int64 `json:"radius"`
+	SolarSystemID int64 `json:"solarSystemID"`
+	Statistics map[string]interface{} `json:"statistics"`
+	TypeID int64 `json:"typeID"`
 }

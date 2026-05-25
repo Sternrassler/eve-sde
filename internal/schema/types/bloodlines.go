@@ -7,14 +7,14 @@ package types
 // Bloodlines represents the schema for bloodlines.jsonl
 type Bloodlines struct {
 	Key int64 `json:"_key"`
-	Charisma int64 `json:"charisma,omitempty"`
-	CorporationID int64 `json:"corporationID,omitempty"`
-	Description LocalizedText `json:"description,omitempty"`
+	Charisma int64 `json:"charisma"`
+	CorporationID int64 `json:"corporationID"`
+	Description LocalizedText `json:"description"`
 	IconID int64 `json:"iconID,omitempty"`
-	Intelligence int64 `json:"intelligence,omitempty"`
-	Memory int64 `json:"memory,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
-	Perception int64 `json:"perception,omitempty"`
-	RaceID int64 `json:"raceID,omitempty"`
-	Willpower int64 `json:"willpower,omitempty"`
+	Intelligence int64 `json:"intelligence"`
+	Memory int64 `json:"memory"`
+	Name LocalizedText `json:"name"`
+	Perception int64 `json:"perception"`
+	RaceID int64 `json:"raceID"`
+	Willpower int64 `json:"willpower"`
 }

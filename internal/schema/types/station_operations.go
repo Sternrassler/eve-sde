@@ -7,16 +7,16 @@ package types
 // StationOperations represents the schema for stationOperations.jsonl
 type StationOperations struct {
 	Key int64 `json:"_key"`
-	ActivityID int64 `json:"activityID,omitempty"`
-	Border float64 `json:"border,omitempty"`
-	Corridor float64 `json:"corridor,omitempty"`
+	ActivityID int64 `json:"activityID"`
+	Border float64 `json:"border"`
+	Corridor float64 `json:"corridor"`
 	Description LocalizedText `json:"description,omitempty"`
-	Fringe float64 `json:"fringe,omitempty"`
-	Hub float64 `json:"hub,omitempty"`
-	ManufacturingFactor float64 `json:"manufacturingFactor,omitempty"`
-	OperationName LocalizedText `json:"operationName,omitempty"`
-	Ratio float64 `json:"ratio,omitempty"`
-	ResearchFactor float64 `json:"researchFactor,omitempty"`
-	Services []int64 `json:"services,omitempty"`
+	Fringe float64 `json:"fringe"`
+	Hub float64 `json:"hub"`
+	ManufacturingFactor float64 `json:"manufacturingFactor"`
+	OperationName LocalizedText `json:"operationName"`
+	Ratio float64 `json:"ratio"`
+	ResearchFactor float64 `json:"researchFactor"`
+	Services []int64 `json:"services"`
 	StationTypes []map[string]interface{} `json:"stationTypes,omitempty"`
 }

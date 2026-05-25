@@ -9,7 +9,7 @@ type Races struct {
 	Key int64 `json:"_key"`
 	Description LocalizedText `json:"description,omitempty"`
 	IconID int64 `json:"iconID,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
+	Name LocalizedText `json:"name"`
 	ShipTypeID int64 `json:"shipTypeID,omitempty"`
 	Skills []map[string]interface{} `json:"skills,omitempty"`
 }

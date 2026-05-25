@@ -2,6 +2,64 @@
 
 package registry
 
+import (
+	"reflect"
+
+	"github.com/Sternrassler/eve-sde/internal/schema/types"
+)
+
 // Mappings is the generated registry of all JSONL datasets to import.
-// Dieser Platzhalter wird beim ersten sde-schema-gen-Lauf überschrieben.
-var Mappings = []SchemaMapping{}
+var Mappings = []SchemaMapping{
+	{Name: "_sde", JSONLFile: "_sde.jsonl", StructType: reflect.TypeOf(types.SDE{}), Indices: nil},
+	{Name: "agentTypes", JSONLFile: "agentTypes.jsonl", StructType: reflect.TypeOf(types.AgentTypes{}), Indices: nil},
+	{Name: "agentsInSpace", JSONLFile: "agentsInSpace.jsonl", StructType: reflect.TypeOf(types.AgentsInSpace{}), Indices: []string{"dungeonID", "solarSystemID", "spawnPointID", "typeID"}},
+	{Name: "ancestries", JSONLFile: "ancestries.jsonl", StructType: reflect.TypeOf(types.Ancestries{}), Indices: []string{"bloodlineID", "iconID"}},
+	{Name: "bloodlines", JSONLFile: "bloodlines.jsonl", StructType: reflect.TypeOf(types.Bloodlines{}), Indices: []string{"corporationID", "iconID", "raceID"}},
+	{Name: "blueprints", JSONLFile: "blueprints.jsonl", StructType: reflect.TypeOf(types.Blueprints{}), Indices: []string{"blueprintTypeID"}},
+	{Name: "categories", JSONLFile: "categories.jsonl", StructType: reflect.TypeOf(types.Categories{}), Indices: []string{"iconID"}},
+	{Name: "certificates", JSONLFile: "certificates.jsonl", StructType: reflect.TypeOf(types.Certificates{}), Indices: []string{"groupID"}},
+	{Name: "characterAttributes", JSONLFile: "characterAttributes.jsonl", StructType: reflect.TypeOf(types.CharacterAttributes{}), Indices: []string{"iconID"}},
+	{Name: "contrabandTypes", JSONLFile: "contrabandTypes.jsonl", StructType: reflect.TypeOf(types.ContrabandTypes{}), Indices: nil},
+	{Name: "controlTowerResources", JSONLFile: "controlTowerResources.jsonl", StructType: reflect.TypeOf(types.ControlTowerResources{}), Indices: nil},
+	{Name: "corporationActivities", JSONLFile: "corporationActivities.jsonl", StructType: reflect.TypeOf(types.CorporationActivities{}), Indices: nil},
+	{Name: "dbuffCollections", JSONLFile: "dbuffCollections.jsonl", StructType: reflect.TypeOf(types.DbuffCollections{}), Indices: nil},
+	{Name: "dogmaAttributeCategories", JSONLFile: "dogmaAttributeCategories.jsonl", StructType: reflect.TypeOf(types.DogmaAttributeCategories{}), Indices: nil},
+	{Name: "dogmaAttributes", JSONLFile: "dogmaAttributes.jsonl", StructType: reflect.TypeOf(types.DogmaAttributes{}), Indices: []string{"attributeCategoryID", "chargeRechargeTimeID", "iconID", "maxAttributeID", "minAttributeID", "unitID"}},
+	{Name: "dogmaEffects", JSONLFile: "dogmaEffects.jsonl", StructType: reflect.TypeOf(types.DogmaEffects{}), Indices: []string{"dischargeAttributeID", "durationAttributeID", "effectCategoryID", "falloffAttributeID", "fittingUsageChanceAttributeID", "iconID", "npcActivationChanceAttributeID", "npcUsageChanceAttributeID", "rangeAttributeID", "resistanceAttributeID", "trackingSpeedAttributeID"}},
+	{Name: "dogmaUnits", JSONLFile: "dogmaUnits.jsonl", StructType: reflect.TypeOf(types.DogmaUnits{}), Indices: nil},
+	{Name: "dynamicItemAttributes", JSONLFile: "dynamicItemAttributes.jsonl", StructType: reflect.TypeOf(types.DynamicItemAttributes{}), Indices: nil},
+	{Name: "factions", JSONLFile: "factions.jsonl", StructType: reflect.TypeOf(types.Factions{}), Indices: []string{"corporationID", "iconID", "militiaCorporationID", "solarSystemID"}},
+	{Name: "graphics", JSONLFile: "graphics.jsonl", StructType: reflect.TypeOf(types.Graphics{}), Indices: []string{"sofMaterialSetID"}},
+	{Name: "groups", JSONLFile: "groups.jsonl", StructType: reflect.TypeOf(types.Groups{}), Indices: []string{"categoryID", "iconID"}},
+	{Name: "icons", JSONLFile: "icons.jsonl", StructType: reflect.TypeOf(types.Icons{}), Indices: nil},
+	{Name: "landmarks", JSONLFile: "landmarks.jsonl", StructType: reflect.TypeOf(types.Landmarks{}), Indices: []string{"iconID", "locationID"}},
+	{Name: "mapAsteroidBelts", JSONLFile: "mapAsteroidBelts.jsonl", StructType: reflect.TypeOf(types.MapAsteroidBelts{}), Indices: []string{"orbitID", "solarSystemID", "typeID"}},
+	{Name: "mapConstellations", JSONLFile: "mapConstellations.jsonl", StructType: reflect.TypeOf(types.MapConstellations{}), Indices: []string{"factionID", "regionID", "wormholeClassID"}},
+	{Name: "mapMoons", JSONLFile: "mapMoons.jsonl", StructType: reflect.TypeOf(types.MapMoons{}), Indices: []string{"orbitID", "solarSystemID", "typeID"}},
+	{Name: "mapPlanets", JSONLFile: "mapPlanets.jsonl", StructType: reflect.TypeOf(types.MapPlanets{}), Indices: []string{"orbitID", "solarSystemID", "typeID"}},
+	{Name: "mapRegions", JSONLFile: "mapRegions.jsonl", StructType: reflect.TypeOf(types.MapRegions{}), Indices: []string{"factionID", "nebulaID", "wormholeClassID"}},
+	{Name: "mapSolarSystems", JSONLFile: "mapSolarSystems.jsonl", StructType: reflect.TypeOf(types.MapSolarSystems{}), Indices: []string{"constellationID", "securityClass"}},
+	{Name: "mapStargates", JSONLFile: "mapStargates.jsonl", StructType: reflect.TypeOf(types.MapStargates{}), Indices: []string{"solarSystemID", "destination"}},
+	{Name: "mapStars", JSONLFile: "mapStars.jsonl", StructType: reflect.TypeOf(types.MapStars{}), Indices: []string{"solarSystemID", "typeID"}},
+	{Name: "marketGroups", JSONLFile: "marketGroups.jsonl", StructType: reflect.TypeOf(types.MarketGroups{}), Indices: []string{"iconID", "parentGroupID"}},
+	{Name: "masteries", JSONLFile: "masteries.jsonl", StructType: reflect.TypeOf(types.Masteries{}), Indices: nil},
+	{Name: "metaGroups", JSONLFile: "metaGroups.jsonl", StructType: reflect.TypeOf(types.MetaGroups{}), Indices: []string{"iconID"}},
+	{Name: "npcCharacters", JSONLFile: "npcCharacters.jsonl", StructType: reflect.TypeOf(types.NpcCharacters{}), Indices: []string{"ancestryID", "bloodlineID", "careerID", "corporationID", "locationID", "raceID", "schoolID", "specialityID"}},
+	{Name: "npcCorporationDivisions", JSONLFile: "npcCorporationDivisions.jsonl", StructType: reflect.TypeOf(types.NpcCorporationDivisions{}), Indices: nil},
+	{Name: "npcCorporations", JSONLFile: "npcCorporations.jsonl", StructType: reflect.TypeOf(types.NpcCorporations{}), Indices: []string{"ceoID", "enemyID", "factionID", "friendID", "iconID", "mainActivityID", "raceID", "secondaryActivityID", "solarSystemID", "stationID"}},
+	{Name: "npcStations", JSONLFile: "npcStations.jsonl", StructType: reflect.TypeOf(types.NpcStations{}), Indices: []string{"operationID", "orbitID", "ownerID", "solarSystemID", "typeID"}},
+	{Name: "planetResources", JSONLFile: "planetResources.jsonl", StructType: reflect.TypeOf(types.PlanetResources{}), Indices: nil},
+	{Name: "planetSchematics", JSONLFile: "planetSchematics.jsonl", StructType: reflect.TypeOf(types.PlanetSchematics{}), Indices: nil},
+	{Name: "races", JSONLFile: "races.jsonl", StructType: reflect.TypeOf(types.Races{}), Indices: []string{"iconID", "shipTypeID"}},
+	{Name: "skinLicenses", JSONLFile: "skinLicenses.jsonl", StructType: reflect.TypeOf(types.SkinLicenses{}), Indices: []string{"licenseTypeID", "skinID"}},
+	{Name: "skinMaterials", JSONLFile: "skinMaterials.jsonl", StructType: reflect.TypeOf(types.SkinMaterials{}), Indices: []string{"materialSetID"}},
+	{Name: "skins", JSONLFile: "skins.jsonl", StructType: reflect.TypeOf(types.Skins{}), Indices: []string{"skinMaterialID"}},
+	{Name: "sovereigntyUpgrades", JSONLFile: "sovereigntyUpgrades.jsonl", StructType: reflect.TypeOf(types.SovereigntyUpgrades{}), Indices: nil},
+	{Name: "stationOperations", JSONLFile: "stationOperations.jsonl", StructType: reflect.TypeOf(types.StationOperations{}), Indices: []string{"activityID"}},
+	{Name: "stationServices", JSONLFile: "stationServices.jsonl", StructType: reflect.TypeOf(types.StationServices{}), Indices: nil},
+	{Name: "translationLanguages", JSONLFile: "translationLanguages.jsonl", StructType: reflect.TypeOf(types.TranslationLanguages{}), Indices: nil},
+	{Name: "typeBonus", JSONLFile: "typeBonus.jsonl", StructType: reflect.TypeOf(types.TypeBonus{}), Indices: []string{"iconID"}},
+	{Name: "typeDogma", JSONLFile: "typeDogma.jsonl", StructType: reflect.TypeOf(types.TypeDogma{}), Indices: nil},
+	{Name: "typeMaterials", JSONLFile: "typeMaterials.jsonl", StructType: reflect.TypeOf(types.TypeMaterials{}), Indices: nil},
+	{Name: "types", JSONLFile: "types.jsonl", StructType: reflect.TypeOf(types.Types{}), Indices: []string{"factionID", "graphicID", "groupID", "iconID", "marketGroupID", "metaGroupID", "raceID", "soundID", "variationParentTypeID"}},
+}

@@ -7,5 +7,5 @@ package types
 // Icons represents the schema for icons.jsonl
 type Icons struct {
 	Key int64 `json:"_key"`
-	IconFile string `json:"iconFile,omitempty"`
+	IconFile string `json:"iconFile"`
 }

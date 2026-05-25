@@ -7,9 +7,9 @@ package types
 // Certificates represents the schema for certificates.jsonl
 type Certificates struct {
 	Key int64 `json:"_key"`
-	Description LocalizedText `json:"description,omitempty"`
-	GroupID int64 `json:"groupID,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
+	Description LocalizedText `json:"description"`
+	GroupID int64 `json:"groupID"`
+	Name LocalizedText `json:"name"`
 	RecommendedFor []int64 `json:"recommendedFor,omitempty"`
-	SkillTypes []map[string]interface{} `json:"skillTypes,omitempty"`
+	SkillTypes []map[string]interface{} `json:"skillTypes"`
 }

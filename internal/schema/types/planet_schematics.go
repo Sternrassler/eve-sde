@@ -7,8 +7,8 @@ package types
 // PlanetSchematics represents the schema for planetSchematics.jsonl
 type PlanetSchematics struct {
 	Key int64 `json:"_key"`
-	CycleTime int64 `json:"cycleTime,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
-	Pins []int64 `json:"pins,omitempty"`
-	Types []map[string]interface{} `json:"types,omitempty"`
+	CycleTime int64 `json:"cycleTime"`
+	Name LocalizedText `json:"name"`
+	Pins []int64 `json:"pins"`
+	Types []map[string]interface{} `json:"types"`
 }

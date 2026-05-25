@@ -7,18 +7,20 @@ package types
 // NpcCharacters represents the schema for npcCharacters.jsonl
 type NpcCharacters struct {
 	Key int64 `json:"_key"`
+	Agent map[string]interface{} `json:"agent,omitempty"`
 	AncestryID int64 `json:"ancestryID,omitempty"`
-	BloodlineID int64 `json:"bloodlineID,omitempty"`
+	BloodlineID int64 `json:"bloodlineID"`
 	CareerID int64 `json:"careerID,omitempty"`
-	CEO bool `json:"ceo,omitempty"`
-	CorporationID int64 `json:"corporationID,omitempty"`
-	Gender bool `json:"gender,omitempty"`
+	CEO bool `json:"ceo"`
+	CorporationID int64 `json:"corporationID"`
+	Description string `json:"description,omitempty"`
+	Gender bool `json:"gender"`
 	LocationID int64 `json:"locationID,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
-	RaceID int64 `json:"raceID,omitempty"`
+	Name LocalizedText `json:"name"`
+	RaceID int64 `json:"raceID"`
 	SchoolID int64 `json:"schoolID,omitempty"`
 	Skills []map[string]interface{} `json:"skills,omitempty"`
 	SpecialityID int64 `json:"specialityID,omitempty"`
 	StartDate string `json:"startDate,omitempty"`
-	UniqueName bool `json:"uniqueName,omitempty"`
+	UniqueName bool `json:"uniqueName"`
 }

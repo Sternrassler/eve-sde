@@ -8,5 +8,5 @@ package types
 type StationServices struct {
 	Key int64 `json:"_key"`
 	Description LocalizedText `json:"description,omitempty"`
-	ServiceName LocalizedText `json:"serviceName,omitempty"`
+	ServiceName LocalizedText `json:"serviceName"`
 }

@@ -8,14 +8,15 @@ package types
 type MapPlanets struct {
 	Key int64 `json:"_key"`
 	AsteroidBeltIDs []int64 `json:"asteroidBeltIDs,omitempty"`
-	Attributes map[string]interface{} `json:"attributes,omitempty"`
-	CelestialIndex int64 `json:"celestialIndex,omitempty"`
+	Attributes map[string]interface{} `json:"attributes"`
+	CelestialIndex int64 `json:"celestialIndex"`
 	MoonIDs []int64 `json:"moonIDs,omitempty"`
 	NpcStationIDs []int64 `json:"npcStationIDs,omitempty"`
-	OrbitID int64 `json:"orbitID,omitempty"`
-	Position map[string]interface{} `json:"position,omitempty"`
-	Radius int64 `json:"radius,omitempty"`
-	SolarSystemID int64 `json:"solarSystemID,omitempty"`
-	Statistics map[string]interface{} `json:"statistics,omitempty"`
-	TypeID int64 `json:"typeID,omitempty"`
+	OrbitID int64 `json:"orbitID"`
+	Position map[string]interface{} `json:"position"`
+	Radius int64 `json:"radius"`
+	SolarSystemID int64 `json:"solarSystemID"`
+	Statistics map[string]interface{} `json:"statistics"`
+	TypeID int64 `json:"typeID"`
+	UniqueName LocalizedText `json:"uniqueName,omitempty"`
 }

@@ -9,18 +9,18 @@ type DogmaAttributes struct {
 	Key int64 `json:"_key"`
 	AttributeCategoryID int64 `json:"attributeCategoryID,omitempty"`
 	ChargeRechargeTimeID int64 `json:"chargeRechargeTimeID,omitempty"`
-	DataType int64 `json:"dataType,omitempty"`
-	DefaultValue int64 `json:"defaultValue,omitempty"`
+	DataType int64 `json:"dataType"`
+	DefaultValue float64 `json:"defaultValue"`
 	Description string `json:"description,omitempty"`
 	DisplayName LocalizedText `json:"displayName,omitempty"`
-	DisplayWhenZero bool `json:"displayWhenZero,omitempty"`
-	HighIsGood bool `json:"highIsGood,omitempty"`
+	DisplayWhenZero bool `json:"displayWhenZero"`
+	HighIsGood bool `json:"highIsGood"`
 	IconID int64 `json:"iconID,omitempty"`
 	MaxAttributeID int64 `json:"maxAttributeID,omitempty"`
 	MinAttributeID int64 `json:"minAttributeID,omitempty"`
-	Name string `json:"name,omitempty"`
-	Published bool `json:"published,omitempty"`
-	Stackable bool `json:"stackable,omitempty"`
+	Name string `json:"name"`
+	Published bool `json:"published"`
+	Stackable bool `json:"stackable"`
 	TooltipDescription LocalizedText `json:"tooltipDescription,omitempty"`
 	TooltipTitle LocalizedText `json:"tooltipTitle,omitempty"`
 	UnitID int64 `json:"unitID,omitempty"`

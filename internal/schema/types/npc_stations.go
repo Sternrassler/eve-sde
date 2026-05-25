@@ -8,15 +8,15 @@ package types
 type NpcStations struct {
 	Key int64 `json:"_key"`
 	CelestialIndex int64 `json:"celestialIndex,omitempty"`
-	OperationID int64 `json:"operationID,omitempty"`
-	OrbitID int64 `json:"orbitID,omitempty"`
+	OperationID int64 `json:"operationID"`
+	OrbitID int64 `json:"orbitID"`
 	OrbitIndex int64 `json:"orbitIndex,omitempty"`
-	OwnerID int64 `json:"ownerID,omitempty"`
-	Position map[string]interface{} `json:"position,omitempty"`
-	ReprocessingEfficiency float64 `json:"reprocessingEfficiency,omitempty"`
-	ReprocessingHangarFlag int64 `json:"reprocessingHangarFlag,omitempty"`
-	ReprocessingStationsTake float64 `json:"reprocessingStationsTake,omitempty"`
-	SolarSystemID int64 `json:"solarSystemID,omitempty"`
-	TypeID int64 `json:"typeID,omitempty"`
-	UseOperationName bool `json:"useOperationName,omitempty"`
+	OwnerID int64 `json:"ownerID"`
+	Position map[string]interface{} `json:"position"`
+	ReprocessingEfficiency float64 `json:"reprocessingEfficiency"`
+	ReprocessingHangarFlag int64 `json:"reprocessingHangarFlag"`
+	ReprocessingStationsTake float64 `json:"reprocessingStationsTake"`
+	SolarSystemID int64 `json:"solarSystemID"`
+	TypeID int64 `json:"typeID"`
+	UseOperationName bool `json:"useOperationName"`
 }

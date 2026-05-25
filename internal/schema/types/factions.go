@@ -8,15 +8,15 @@ package types
 type Factions struct {
 	Key int64 `json:"_key"`
 	CorporationID int64 `json:"corporationID,omitempty"`
-	Description LocalizedText `json:"description,omitempty"`
+	Description LocalizedText `json:"description"`
 	FlatLogo string `json:"flatLogo,omitempty"`
 	FlatLogoWithName string `json:"flatLogoWithName,omitempty"`
-	IconID int64 `json:"iconID,omitempty"`
-	MemberRaces []int64 `json:"memberRaces,omitempty"`
+	IconID int64 `json:"iconID"`
+	MemberRaces []int64 `json:"memberRaces"`
 	MilitiaCorporationID int64 `json:"militiaCorporationID,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
+	Name LocalizedText `json:"name"`
 	ShortDescription LocalizedText `json:"shortDescription,omitempty"`
-	SizeFactor int64 `json:"sizeFactor,omitempty"`
-	SolarSystemID int64 `json:"solarSystemID,omitempty"`
-	UniqueName bool `json:"uniqueName,omitempty"`
+	SizeFactor int64 `json:"sizeFactor"`
+	SolarSystemID int64 `json:"solarSystemID"`
+	UniqueName bool `json:"uniqueName"`
 }

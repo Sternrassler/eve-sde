@@ -7,11 +7,11 @@ package types
 // MapRegions represents the schema for mapRegions.jsonl
 type MapRegions struct {
 	Key int64 `json:"_key"`
-	ConstellationIDs []int64 `json:"constellationIDs,omitempty"`
+	ConstellationIDs []int64 `json:"constellationIDs"`
 	Description LocalizedText `json:"description,omitempty"`
 	FactionID int64 `json:"factionID,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
-	NebulaID int64 `json:"nebulaID,omitempty"`
-	Position map[string]interface{} `json:"position,omitempty"`
+	Name LocalizedText `json:"name"`
+	NebulaID int64 `json:"nebulaID"`
+	Position map[string]interface{} `json:"position"`
 	WormholeClassID int64 `json:"wormholeClassID,omitempty"`
 }
