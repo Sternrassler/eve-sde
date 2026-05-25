@@ -6,10 +6,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strings"
 
-	"github.com/Sternrassler/eve-sde/internal/schema/types"
+	"github.com/Sternrassler/eve-sde/internal/registry"
 	sdeversion "github.com/Sternrassler/eve-sde/internal/sde/version"
 	"github.com/Sternrassler/eve-sde/internal/sqlite/importer"
 	"github.com/Sternrassler/eve-sde/internal/sqlite/schema"
@@ -18,57 +17,6 @@ import (
 
 const appVersion = "0.1.0"
 
-// SchemaMapping definiert Mapping zwischen JSONL und Go-Typen
-type SchemaMapping struct {
-	Name       string
-	JSONLFile  string
-	StructType reflect.Type
-	Indices    []string
-}
-
-var schemaMappings = []SchemaMapping{
-	{"agentTypes", "agentTypes.jsonl", reflect.TypeOf(types.AgentTypes{}), nil},
-	{"ancestries", "ancestries.jsonl", reflect.TypeOf(types.Ancestries{}), []string{"bloodlineID"}},
-	{"bloodlines", "bloodlines.jsonl", reflect.TypeOf(types.Bloodlines{}), []string{"raceID"}},
-	{"blueprints", "blueprints.jsonl", reflect.TypeOf(types.Blueprints{}), []string{"blueprintTypeID"}},
-	{"categories", "categories.jsonl", reflect.TypeOf(types.Categories{}), nil},
-	{"certificates", "certificates.jsonl", reflect.TypeOf(types.Certificates{}), []string{"groupID"}},
-	{"characterAttributes", "characterAttributes.jsonl", reflect.TypeOf(types.CharacterAttributes{}), nil},
-	{"contrabandTypes", "contrabandTypes.jsonl", reflect.TypeOf(types.ContrabandTypes{}), []string{"factionID"}},
-	{"controlTowerResources", "controlTowerResources.jsonl", reflect.TypeOf(types.ControlTowerResources{}), []string{"controlTowerTypeID"}},
-	{"corporationActivities", "corporationActivities.jsonl", reflect.TypeOf(types.CorporationActivities{}), nil},
-	{"dogmaAttributeCategories", "dogmaAttributeCategories.jsonl", reflect.TypeOf(types.DogmaAttributeCategories{}), nil},
-	{"dogmaAttributes", "dogmaAttributes.jsonl", reflect.TypeOf(types.DogmaAttributes{}), []string{"categoryID"}},
-	{"dogmaEffects", "dogmaEffects.jsonl", reflect.TypeOf(types.DogmaEffects{}), nil},
-	{"factions", "factions.jsonl", reflect.TypeOf(types.Factions{}), []string{"solarSystemID"}},
-	{"graphics", "graphics.jsonl", reflect.TypeOf(types.Graphics{}), nil},
-	{"groups", "groups.jsonl", reflect.TypeOf(types.Groups{}), []string{"categoryID"}},
-	{"icons", "icons.jsonl", reflect.TypeOf(types.Icons{}), nil},
-	{"marketGroups", "marketGroups.jsonl", reflect.TypeOf(types.MarketGroups{}), []string{"parentGroupID"}},
-	{"metaGroups", "metaGroups.jsonl", reflect.TypeOf(types.MetaGroups{}), nil},
-	{"npcCorporationDivisions", "npcCorporationDivisions.jsonl", reflect.TypeOf(types.NpcCorporationDivisions{}), []string{"corporationID"}},
-	{"npcCorporations", "npcCorporations.jsonl", reflect.TypeOf(types.NpcCorporations{}), []string{"factionID"}},
-	{"planetSchematics", "planetSchematics.jsonl", reflect.TypeOf(types.PlanetSchematics{}), nil},
-	{"races", "races.jsonl", reflect.TypeOf(types.Races{}), nil},
-	{"skinLicenses", "skinLicenses.jsonl", reflect.TypeOf(types.SkinLicenses{}), []string{"skinID"}},
-	{"skinMaterials", "skinMaterials.jsonl", reflect.TypeOf(types.SkinMaterials{}), []string{"skinID"}},
-	{"skins", "skins.jsonl", reflect.TypeOf(types.Skins{}), nil},
-	{"stationOperations", "stationOperations.jsonl", reflect.TypeOf(types.StationOperations{}), nil},
-	{"stationServices", "stationServices.jsonl", reflect.TypeOf(types.StationServices{}), nil},
-	{"translationLanguages", "translationLanguages.jsonl", reflect.TypeOf(types.TranslationLanguages{}), nil},
-	{"typeDogma", "typeDogma.jsonl", reflect.TypeOf(types.TypeDogma{}), []string{"typeID"}},
-	{"typeMaterials", "typeMaterials.jsonl", reflect.TypeOf(types.TypeMaterials{}), []string{"typeID", "materialTypeID"}},
-	{"types", "types.jsonl", reflect.TypeOf(types.Types{}), []string{"groupID", "marketGroupID"}},
-	{"dogmaUnits", "dogmaUnits.jsonl", reflect.TypeOf(types.DogmaUnits{}), nil},
-	{"mapConstellations", "mapConstellations.jsonl", reflect.TypeOf(types.MapConstellations{}), []string{"regionID"}},
-	{"mapMoons", "mapMoons.jsonl", reflect.TypeOf(types.MapMoons{}), []string{"solarSystemID"}},
-	{"mapPlanets", "mapPlanets.jsonl", reflect.TypeOf(types.MapPlanets{}), []string{"solarSystemID"}},
-	{"mapRegions", "mapRegions.jsonl", reflect.TypeOf(types.MapRegions{}), nil},
-	{"mapSolarSystems", "mapSolarSystems.jsonl", reflect.TypeOf(types.MapSolarSystems{}), []string{"constellationID", "securityClass"}},
-	{"mapStargates", "mapStargates.jsonl", reflect.TypeOf(types.MapStargates{}), []string{"solarSystemID", "destination"}},
-	{"npcStations", "npcStations.jsonl", reflect.TypeOf(types.NpcStations{}), []string{"solarSystemID", "typeID"}},
-	{"_sde", "_sde.jsonl", reflect.TypeOf(types.SDE{}), nil},
-}
 
 func main() {
 	// Flags
@@ -148,9 +96,9 @@ func main() {
 	defer imp.Close()
 
 	// Filter Schemas
-	schemasToImport := schemaMappings
+	schemasToImport := registry.Mappings
 	if *importTable != "" {
-		schemasToImport = filterSchemas(schemaMappings, *importTable)
+		schemasToImport = filterSchemas(registry.Mappings, *importTable)
 		if len(schemasToImport) == 0 {
 			log.Fatalf("Table not found: %s", *importTable)
 		}
@@ -201,7 +149,7 @@ func initializeSchema(dbPath string) error {
 
 	gen := schema.NewGenerator()
 
-	for _, mapping := range schemaMappings {
+	for _, mapping := range registry.Mappings {
 		statements, err := gen.GenerateSchema(mapping.Name, mapping.StructType, mapping.Indices)
 		if err != nil {
 			return fmt.Errorf("failed to generate schema for %s: %w", mapping.Name, err)
@@ -218,10 +166,10 @@ func initializeSchema(dbPath string) error {
 }
 
 // filterSchemas filtert Schemas nach Name
-func filterSchemas(all []SchemaMapping, name string) []SchemaMapping {
+func filterSchemas(all []registry.SchemaMapping, name string) []registry.SchemaMapping {
 	for _, s := range all {
 		if s.Name == name {
-			return []SchemaMapping{s}
+			return []registry.SchemaMapping{s}
 		}
 	}
 	return nil
