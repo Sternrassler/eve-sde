@@ -14,10 +14,11 @@ type Schema struct {
 
 // FieldInfo enthält Type-Informationen für ein Feld
 type FieldInfo struct {
-	GoType       string
-	IsRequired   bool
-	IsLocalized  bool
-	SampleValues []interface{}
+	GoType        string
+	IsRequired    bool
+	IsLocalized   bool
+	PresenceCount int           // Anzahl Zeilen, in denen das Feld non-null vorhanden war
+	SampleValues  []interface{}
 }
 
 // AnalyzeJSONL analysiert eine JSONL-Datei und extrahiert Schema-Informationen
@@ -54,11 +55,9 @@ func AnalyzeJSONL(path string, maxLines int) (*Schema, error) {
 				schema.Fields[key] = field
 			}
 
-			// Zähle Vorkommen (auch null)
-			field.SampleValues = append(field.SampleValues[:0:0], field.SampleValues...) // Ensure capacity
-
-			// Speichere Non-Null Sample-Werte (max 3)
+			// Speichere Non-Null Sample-Werte (max 3) und zähle Präsenz
 			if value != nil {
+				field.PresenceCount++
 				if len(field.SampleValues) < 3 {
 					field.SampleValues = append(field.SampleValues, value)
 				}
@@ -104,12 +103,8 @@ func AnalyzeJSONL(path string, maxLines int) (*Schema, error) {
 			field.IsRequired = true // _key immer required
 			continue
 		}
-		// Wenn wir Sample-Werte haben und sie in allen Zeilen vorkommen → required
-		if len(field.SampleValues) == lineCount && lineCount > 1 {
-			field.IsRequired = true
-		} else {
-			field.IsRequired = false
-		}
+		// Feld in jeder analysierten Zeile non-null vorhanden → required (NOT NULL)
+		field.IsRequired = lineCount > 0 && field.PresenceCount == lineCount
 	}
 
 	return schema, nil
