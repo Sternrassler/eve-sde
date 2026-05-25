@@ -56,13 +56,6 @@ func main() {
 		}
 	} else {
 		log.Println("→ Force mode enabled, skipping version check")
-		// Bei --force alte DB löschen falls vorhanden
-		if _, err := os.Stat(sqliteDB); err == nil {
-			log.Printf("→ Removing existing database: %s", sqliteDB)
-			if err := os.Remove(sqliteDB); err != nil {
-				log.Fatalf("Failed to remove existing database: %v", err)
-			}
-		}
 	}
 
 	// 2. Download SDE
@@ -83,6 +76,16 @@ func main() {
 
 	// 4. Import to SQLite (optional)
 	if !*skipImport {
+		// Voller Rebuild: bestehende DB entfernen, damit Schema-Änderungen einer neuen
+		// SDE-Version (z.B. neue Spalten) greifen. CREATE TABLE IF NOT EXISTS würde sonst
+		// eine veraltete Tabelle behalten und nachgelagerte Indizes auf neue Spalten scheitern.
+		// (Gilt für --force UND den regulären "Update verfügbar"-Pfad.)
+		if _, err := os.Stat(sqliteDB); err == nil {
+			log.Printf("→ Removing existing database for clean rebuild: %s", sqliteDB)
+			if err := os.Remove(sqliteDB); err != nil {
+				log.Fatalf("Failed to remove existing database: %v", err)
+			}
+		}
 		log.Println("→ Importing to SQLite...")
 		args := []string{"run", "./cmd/sde-to-sqlite", "--db", sqliteDB, "--jsonl", jsonlDir}
 		if *verbose {
