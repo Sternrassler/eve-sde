@@ -47,3 +47,41 @@ func TestAnalyzeJSONL_RequiredAcrossManyLines(t *testing.T) {
 		t.Error(`"_key" sollte immer required sein`)
 	}
 }
+
+func TestAnalyzeJSONL_LateFractionalIsFloat(t *testing.T) {
+	// Die ersten 3 Zeilen haben ganzzahlige "capacity", Zeile 4 hat 0.5.
+	// Mit Whole-File-Analyse (maxLines=0) muss der Typ float64 sein.
+	path := writeJSONL(t, []string{
+		`{"_key": 1, "capacity": 0}`,
+		`{"_key": 2, "capacity": 100}`,
+		`{"_key": 3, "capacity": 200}`,
+		`{"_key": 4, "capacity": 0.5}`,
+	})
+
+	schema, err := AnalyzeJSONL(path, 0)
+	if err != nil {
+		t.Fatalf("AnalyzeJSONL: %v", err)
+	}
+
+	if got := schema.Fields["capacity"].GoType; got != "float64" {
+		t.Errorf("capacity GoType = %q, want \"float64\"", got)
+	}
+}
+
+func TestAnalyzeJSONL_MaxLinesLimitsAnalysis(t *testing.T) {
+	// Mit maxLines=2 wird Zeile 3 (0.5) nicht gelesen → bleibt int64.
+	path := writeJSONL(t, []string{
+		`{"_key": 1, "capacity": 0}`,
+		`{"_key": 2, "capacity": 100}`,
+		`{"_key": 3, "capacity": 0.5}`,
+	})
+
+	schema, err := AnalyzeJSONL(path, 2)
+	if err != nil {
+		t.Fatalf("AnalyzeJSONL: %v", err)
+	}
+
+	if got := schema.Fields["capacity"].GoType; got != "int64" {
+		t.Errorf("capacity GoType = %q, want \"int64\" (nur 2 Zeilen analysiert)", got)
+	}
+}

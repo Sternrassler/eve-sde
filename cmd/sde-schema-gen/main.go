@@ -17,7 +17,7 @@ func main() {
 		inputDir  = flag.String("input", "data/jsonl", "JSONL Input-Verzeichnis")
 		outputDir = flag.String("output", "internal/schema/types", "Go Output-Verzeichnis")
 		verbose   = flag.Bool("v", false, "Verbose Logging")
-		maxLines  = flag.Int("lines", 100, "Max JSONL Zeilen pro Schema-Analyse")
+		maxLines  = flag.Int("lines", 0, "Max JSONL Zeilen pro Schema-Analyse (0 = gesamte Datei)")
 	)
 	flag.Parse()
 

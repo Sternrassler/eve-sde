@@ -36,7 +36,11 @@ func AnalyzeJSONL(path string, maxLines int) (*Schema, error) {
 	scanner := bufio.NewScanner(file)
 	lineCount := 0
 
-	for scanner.Scan() && lineCount < maxLines {
+	// maxLines <= 0 bedeutet: gesamte Datei analysieren
+	for scanner.Scan() {
+		if maxLines > 0 && lineCount >= maxLines {
+			break
+		}
 		lineCount++
 
 		var data map[string]interface{}
