@@ -17,6 +17,7 @@ type Types struct {
 	MarketGroupID int64 `json:"marketGroupID,omitempty"`
 	Mass float64 `json:"mass,omitempty"`
 	MetaGroupID int64 `json:"metaGroupID,omitempty"`
+	MetaLevel int64 `json:"metaLevel,omitempty"`
 	Name LocalizedText `json:"name"`
 	PortionSize int64 `json:"portionSize"`
 	Published bool `json:"published"`

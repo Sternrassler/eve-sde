@@ -7,10 +7,10 @@ package types
 // SovereigntyUpgrades represents the schema for sovereigntyUpgrades.jsonl
 type SovereigntyUpgrades struct {
 	Key int64 `json:"_key"`
-	FuelHourlyUpkeep int64 `json:"fuel_hourly_upkeep,omitempty"`
-	FuelStartupCost int64 `json:"fuel_startup_cost,omitempty"`
-	FuelTypeID int64 `json:"fuel_type_id,omitempty"`
+	Fuel map[string]interface{} `json:"fuel,omitempty"`
 	MutuallyExclusiveGroup string `json:"mutually_exclusive_group"`
-	PowerAllocation int64 `json:"power_allocation"`
-	WorkforceAllocation int64 `json:"workforce_allocation"`
+	PowerAllocation int64 `json:"power_allocation,omitempty"`
+	PowerProduction int64 `json:"power_production,omitempty"`
+	WorkforceAllocation int64 `json:"workforce_allocation,omitempty"`
+	WorkforceProduction int64 `json:"workforce_production,omitempty"`
 }

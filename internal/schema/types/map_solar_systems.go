@@ -20,6 +20,7 @@ type MapSolarSystems struct {
 	Name LocalizedText `json:"name"`
 	PlanetIDs []int64 `json:"planetIDs,omitempty"`
 	Position map[string]interface{} `json:"position"`
+	Position2d map[string]interface{} `json:"position2D,omitempty"`
 	Radius int64 `json:"radius"`
 	RegionID int64 `json:"regionID"`
 	Regional bool `json:"regional,omitempty"`
