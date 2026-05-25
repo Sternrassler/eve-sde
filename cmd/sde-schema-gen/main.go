@@ -39,6 +39,11 @@ func main() {
 		log.Fatalf("Konnte Output-Verzeichnis nicht erstellen: %v", err)
 	}
 
+	// Erstelle Registry-Verzeichnis (für mappings_gen.go)
+	if err := os.MkdirAll(*registryDir, 0755); err != nil {
+		log.Fatalf("Konnte Registry-Verzeichnis nicht erstellen: %v", err)
+	}
+
 	// Finde alle JSONL-Dateien
 	files, err := filepath.Glob(filepath.Join(*inputDir, "*.jsonl"))
 	if err != nil {
@@ -88,7 +93,9 @@ func main() {
 		}
 		successCount++
 
-		// Registry-Eintrag sammeln (Ausschlüsse respektieren)
+		// Registry-Eintrag sammeln (Ausschlüsse respektieren).
+		// Hinweis: successCount zählt generierte Typ-Dateien; ausgeschlossene
+		// Datensätze bekommen weiterhin einen Go-Typ, nur keinen Import-Eintrag.
 		name := strings.TrimSuffix(base, ".jsonl")
 		if reason, excluded := registry.ExcludedDatasets[name]; excluded {
 			log.Printf("⊘ Registry: %s ausgeschlossen (%s)", name, reason)
