@@ -8,20 +8,23 @@ package types
 type MapSolarSystems struct {
 	Key int64 `json:"_key"`
 	Border bool `json:"border,omitempty"`
-	ConstellationID int64 `json:"constellationID,omitempty"`
+	ConstellationID int64 `json:"constellationID"`
 	Corridor bool `json:"corridor,omitempty"`
+	DisallowedAnchorCategories []int64 `json:"disallowedAnchorCategories,omitempty"`
+	DisallowedAnchorGroups []int64 `json:"disallowedAnchorGroups,omitempty"`
+	FactionID int64 `json:"factionID,omitempty"`
 	Fringe bool `json:"fringe,omitempty"`
 	Hub bool `json:"hub,omitempty"`
 	International bool `json:"international,omitempty"`
 	Luminosity float64 `json:"luminosity,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
+	Name LocalizedText `json:"name"`
 	PlanetIDs []int64 `json:"planetIDs,omitempty"`
-	Position map[string]interface{} `json:"position,omitempty"`
-	Radius int64 `json:"radius,omitempty"`
-	RegionID int64 `json:"regionID,omitempty"`
+	Position map[string]interface{} `json:"position"`
+	Radius int64 `json:"radius"`
+	RegionID int64 `json:"regionID"`
 	Regional bool `json:"regional,omitempty"`
 	SecurityClass string `json:"securityClass,omitempty"`
-	SecurityStatus float64 `json:"securityStatus,omitempty"`
+	SecurityStatus float64 `json:"securityStatus"`
 	StarID int64 `json:"starID,omitempty"`
 	StargateIDs []int64 `json:"stargateIDs,omitempty"`
 	VisualEffect string `json:"visualEffect,omitempty"`

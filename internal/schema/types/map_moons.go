@@ -7,14 +7,15 @@ package types
 // MapMoons represents the schema for mapMoons.jsonl
 type MapMoons struct {
 	Key int64 `json:"_key"`
-	Attributes map[string]interface{} `json:"attributes,omitempty"`
-	CelestialIndex int64 `json:"celestialIndex,omitempty"`
+	Attributes map[string]interface{} `json:"attributes"`
+	CelestialIndex int64 `json:"celestialIndex"`
 	NpcStationIDs []int64 `json:"npcStationIDs,omitempty"`
-	OrbitID int64 `json:"orbitID,omitempty"`
-	OrbitIndex int64 `json:"orbitIndex,omitempty"`
-	Position map[string]interface{} `json:"position,omitempty"`
-	Radius int64 `json:"radius,omitempty"`
-	SolarSystemID int64 `json:"solarSystemID,omitempty"`
+	OrbitID int64 `json:"orbitID"`
+	OrbitIndex int64 `json:"orbitIndex"`
+	Position map[string]interface{} `json:"position"`
+	Radius int64 `json:"radius"`
+	SolarSystemID int64 `json:"solarSystemID"`
 	Statistics map[string]interface{} `json:"statistics,omitempty"`
-	TypeID int64 `json:"typeID,omitempty"`
+	TypeID int64 `json:"typeID"`
+	UniqueName LocalizedText `json:"uniqueName,omitempty"`
 }

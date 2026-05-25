@@ -7,12 +7,12 @@ package types
 // Groups represents the schema for groups.jsonl
 type Groups struct {
 	Key int64 `json:"_key"`
-	Anchorable bool `json:"anchorable,omitempty"`
-	Anchored bool `json:"anchored,omitempty"`
-	CategoryID int64 `json:"categoryID,omitempty"`
-	FittableNonSingleton bool `json:"fittableNonSingleton,omitempty"`
+	Anchorable bool `json:"anchorable"`
+	Anchored bool `json:"anchored"`
+	CategoryID int64 `json:"categoryID"`
+	FittableNonSingleton bool `json:"fittableNonSingleton"`
 	IconID int64 `json:"iconID,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
-	Published bool `json:"published,omitempty"`
-	UseBasePrice bool `json:"useBasePrice,omitempty"`
+	Name LocalizedText `json:"name"`
+	Published bool `json:"published"`
+	UseBasePrice bool `json:"useBasePrice"`
 }

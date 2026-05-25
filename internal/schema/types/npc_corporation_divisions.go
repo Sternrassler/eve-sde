@@ -9,7 +9,7 @@ type NpcCorporationDivisions struct {
 	Key int64 `json:"_key"`
 	Description LocalizedText `json:"description,omitempty"`
 	DisplayName string `json:"displayName,omitempty"`
-	InternalName string `json:"internalName,omitempty"`
-	LeaderTypeName LocalizedText `json:"leaderTypeName,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
+	InternalName string `json:"internalName"`
+	LeaderTypeName LocalizedText `json:"leaderTypeName"`
+	Name LocalizedText `json:"name"`
 }

@@ -11,5 +11,7 @@ type Graphics struct {
 	IconFolder string `json:"iconFolder,omitempty"`
 	SofFactionName string `json:"sofFactionName,omitempty"`
 	SofHullName string `json:"sofHullName,omitempty"`
+	SofLayout []string `json:"sofLayout,omitempty"`
+	SofMaterialSetID int64 `json:"sofMaterialSetID,omitempty"`
 	SofRaceName string `json:"sofRaceName,omitempty"`
 }

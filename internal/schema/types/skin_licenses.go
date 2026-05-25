@@ -7,7 +7,8 @@ package types
 // SkinLicenses represents the schema for skinLicenses.jsonl
 type SkinLicenses struct {
 	Key int64 `json:"_key"`
-	Duration int64 `json:"duration,omitempty"`
-	LicenseTypeID int64 `json:"licenseTypeID,omitempty"`
-	SkinID int64 `json:"skinID,omitempty"`
+	Duration int64 `json:"duration"`
+	IsSingleUse bool `json:"isSingleUse,omitempty"`
+	LicenseTypeID int64 `json:"licenseTypeID"`
+	SkinID int64 `json:"skinID"`
 }

@@ -8,8 +8,8 @@ package types
 type MarketGroups struct {
 	Key int64 `json:"_key"`
 	Description LocalizedText `json:"description,omitempty"`
-	HasTypes bool `json:"hasTypes,omitempty"`
+	HasTypes bool `json:"hasTypes"`
 	IconID int64 `json:"iconID,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
+	Name LocalizedText `json:"name"`
 	ParentGroupID int64 `json:"parentGroupID,omitempty"`
 }

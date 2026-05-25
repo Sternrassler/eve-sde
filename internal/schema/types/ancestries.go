@@ -7,14 +7,14 @@ package types
 // Ancestries represents the schema for ancestries.jsonl
 type Ancestries struct {
 	Key int64 `json:"_key"`
-	BloodlineID int64 `json:"bloodlineID,omitempty"`
-	Charisma int64 `json:"charisma,omitempty"`
-	Description LocalizedText `json:"description,omitempty"`
+	BloodlineID int64 `json:"bloodlineID"`
+	Charisma int64 `json:"charisma"`
+	Description LocalizedText `json:"description"`
 	IconID int64 `json:"iconID,omitempty"`
-	Intelligence int64 `json:"intelligence,omitempty"`
-	Memory int64 `json:"memory,omitempty"`
-	Name LocalizedText `json:"name,omitempty"`
-	Perception int64 `json:"perception,omitempty"`
+	Intelligence int64 `json:"intelligence"`
+	Memory int64 `json:"memory"`
+	Name LocalizedText `json:"name"`
+	Perception int64 `json:"perception"`
 	ShortDescription string `json:"shortDescription,omitempty"`
-	Willpower int64 `json:"willpower,omitempty"`
+	Willpower int64 `json:"willpower"`
 }

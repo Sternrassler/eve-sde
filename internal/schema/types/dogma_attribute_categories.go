@@ -8,5 +8,5 @@ package types
 type DogmaAttributeCategories struct {
 	Key int64 `json:"_key"`
 	Description string `json:"description,omitempty"`
-	Name string `json:"name,omitempty"`
+	Name string `json:"name"`
 }

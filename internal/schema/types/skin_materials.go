@@ -8,5 +8,5 @@ package types
 type SkinMaterials struct {
 	Key int64 `json:"_key"`
 	DisplayName LocalizedText `json:"displayName,omitempty"`
-	MaterialSetID int64 `json:"materialSetID,omitempty"`
+	MaterialSetID int64 `json:"materialSetID"`
 }

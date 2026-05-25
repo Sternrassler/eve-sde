@@ -10,7 +10,7 @@ type SovereigntyUpgrades struct {
 	FuelHourlyUpkeep int64 `json:"fuel_hourly_upkeep,omitempty"`
 	FuelStartupCost int64 `json:"fuel_startup_cost,omitempty"`
 	FuelTypeID int64 `json:"fuel_type_id,omitempty"`
-	MutuallyExclusiveGroup string `json:"mutually_exclusive_group,omitempty"`
-	PowerAllocation int64 `json:"power_allocation,omitempty"`
-	WorkforceAllocation int64 `json:"workforce_allocation,omitempty"`
+	MutuallyExclusiveGroup string `json:"mutually_exclusive_group"`
+	PowerAllocation int64 `json:"power_allocation"`
+	WorkforceAllocation int64 `json:"workforce_allocation"`
 }

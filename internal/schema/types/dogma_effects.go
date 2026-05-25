@@ -8,24 +8,28 @@ package types
 type DogmaEffects struct {
 	Key int64 `json:"_key"`
 	Description LocalizedText `json:"description,omitempty"`
-	DisallowAutoRepeat bool `json:"disallowAutoRepeat,omitempty"`
+	DisallowAutoRepeat bool `json:"disallowAutoRepeat"`
 	DischargeAttributeID int64 `json:"dischargeAttributeID,omitempty"`
 	DisplayName LocalizedText `json:"displayName,omitempty"`
 	Distribution int64 `json:"distribution,omitempty"`
 	DurationAttributeID int64 `json:"durationAttributeID,omitempty"`
-	EffectCategoryID int64 `json:"effectCategoryID,omitempty"`
-	ElectronicChance bool `json:"electronicChance,omitempty"`
+	EffectCategoryID int64 `json:"effectCategoryID"`
+	ElectronicChance bool `json:"electronicChance"`
 	FalloffAttributeID int64 `json:"falloffAttributeID,omitempty"`
+	FittingUsageChanceAttributeID int64 `json:"fittingUsageChanceAttributeID,omitempty"`
 	Guid string `json:"guid,omitempty"`
 	IconID int64 `json:"iconID,omitempty"`
-	IsAssistance bool `json:"isAssistance,omitempty"`
-	IsOffensive bool `json:"isOffensive,omitempty"`
-	IsWarpSafe bool `json:"isWarpSafe,omitempty"`
+	IsAssistance bool `json:"isAssistance"`
+	IsOffensive bool `json:"isOffensive"`
+	IsWarpSafe bool `json:"isWarpSafe"`
 	ModifierInfo []map[string]interface{} `json:"modifierInfo,omitempty"`
-	Name string `json:"name,omitempty"`
-	PropulsionChance bool `json:"propulsionChance,omitempty"`
-	Published bool `json:"published,omitempty"`
+	Name string `json:"name"`
+	NpcActivationChanceAttributeID int64 `json:"npcActivationChanceAttributeID,omitempty"`
+	NpcUsageChanceAttributeID int64 `json:"npcUsageChanceAttributeID,omitempty"`
+	PropulsionChance bool `json:"propulsionChance"`
+	Published bool `json:"published"`
 	RangeAttributeID int64 `json:"rangeAttributeID,omitempty"`
-	RangeChance bool `json:"rangeChance,omitempty"`
+	RangeChance bool `json:"rangeChance"`
+	ResistanceAttributeID int64 `json:"resistanceAttributeID,omitempty"`
 	TrackingSpeedAttributeID int64 `json:"trackingSpeedAttributeID,omitempty"`
 }
