@@ -31,4 +31,9 @@ Thumbs.db
 # Editor settings
 .vscode/
 .idea/
-sde-to-sqlite
+
+# Compiled cmd binaries (built into repo root)
+/sde-to-sqlite
+/sde-schema-gen
+/sde-sync
+/sde-version-check
