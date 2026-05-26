@@ -1,7 +1,7 @@
 # Makefile – Zentrale Orchestrierung für Projekt-Automationen
 # Referenz: copilot-instructions.md Abschnitt 3.1
 
-.PHONY: help test lint lint-ci adr-ref commit-lint release-check security-blockers scan scan-json pr-check release ci-local clean ensure-trivy push-ci pr-quality-gates-ci sync
+.PHONY: help test lint lint-ci commit-lint release-check security-blockers scan scan-json pr-check release ci-local clean ensure-trivy push-ci pr-quality-gates-ci sync
 
 # Standardwerte
 TRIVY_FAIL_ON ?= HIGH,CRITICAL
@@ -31,25 +31,6 @@ lint: ## Statische Analysen / Format / Stil (Platzhalter, bitte anpassen)
 
 lint-ci: ## Statische Analysen (CI-Modus, Platzhalter)
 	@echo "[make lint-ci] Kein Lint-Tool definiert – bitte projektspezifische Checks ergänzen"
-
-adr-ref: ## Erzwingt ADR-Referenzen für Governance-Änderungen (CI-kompatibel)
-	@echo "[make adr-ref] Prüfe ADR Referenz-Anforderungen..."; \
-	if [ -x scripts/common/check-adr-ref.sh ]; then \
-		set +e; \
-		bash scripts/common/check-adr-ref.sh; \
-		rc=$$?; \
-		set -e; \
-		if [ $$rc -eq 1 ]; then \
-			echo "[make adr-ref] ❌ ADR-Referenz Pflicht verletzt"; \
-			exit 1; \
-		elif [ $$rc -eq 2 ]; then \
-			echo "[make adr-ref] ⚠️ Skip Marker erkannt – Warnung akzeptiert"; \
-			exit 0; \
-		fi; \
-	else \
-		echo "[make adr-ref] scripts/common/check-adr-ref.sh nicht gefunden" >&2; \
-		exit 1; \
-	fi
 
 commit-lint: ## Validiert Commit Messages (RANGE=origin/main..HEAD oder COMMIT_FILE=pfad)
 	@echo "[make commit-lint] Prüfe Commit Messages..."; \
@@ -126,7 +107,6 @@ release: ## Version bump + CHANGELOG Transform (Beispiel: make release VERSION=0
 ci-local: ## Simulation definierter CI-Gates lokal
 	@echo "[make ci-local] Simuliere CI Pipeline lokal..."
 	@bash scripts/common/check-normative.sh
-	@bash scripts/common/check-adr.sh
 	@$(MAKE) --no-print-directory test
 	@$(MAKE) --no-print-directory scan
 

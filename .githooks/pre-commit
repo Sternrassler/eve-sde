@@ -12,12 +12,7 @@ if [ -x scripts/common/check-normative.sh ]; then
     bash scripts/common/check-normative.sh || exit 1
 fi
 
-# 2. ADR Consistency Check
-if [ -x scripts/common/check-adr.sh ]; then
-    bash scripts/common/check-adr.sh || exit 1
-fi
-
-# 3. Commit Message Check (wird von Git Hook commit-msg erledigt – hier nur Info)
+# 2. Commit Message Check (wird von Git Hook commit-msg erledigt – hier nur Info)
 echo "[pre-commit] Hinweis: Commit Message wird nach diesem Hook geprüft (commit-msg Hook)"
 
 # 4. Keine Secrets im Commit (einfache Heuristik)

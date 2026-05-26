@@ -1,6 +1,6 @@
 # Copilot Instruction – Generische Engineering Richtlinien
 
-Diese Regeldatei gilt für technische Entwicklungs- und Automatisierungsprojekte (z. B. Anwendungs-/Service-Entwicklung, Plattform-/Konfigurationsautomation, Build- und Bereitstellungsprozesse). Sie beschreibt gewünschte Verhaltensweisen, Qualitätsprinzipien, Kollaborations- und Governance-Aspekte für Copilot-Vorschläge – unabhängig von konkreten Technologien oder einzelnen Tools. Konkrete produkt-/domänenspezifische Vorgaben oder Tool-Policies können ergänzend in separaten Dokumenten (z. B. ADRs, SECURITY, Betriebs-Runbooks) definiert werden.
+Diese Regeldatei gilt für technische Entwicklungs- und Automatisierungsprojekte (z. B. Anwendungs-/Service-Entwicklung, Plattform-/Konfigurationsautomation, Build- und Bereitstellungsprozesse). Sie beschreibt gewünschte Verhaltensweisen, Qualitätsprinzipien, Kollaborations- und Governance-Aspekte für Copilot-Vorschläge – unabhängig von konkreten Technologien oder einzelnen Tools. Konkrete produkt-/domänenspezifische Vorgaben oder Tool-Policies können ergänzend in separaten Dokumenten (z. B. SECURITY, Betriebs-Runbooks) definiert werden.
 
 > Normative Schlüsselwörter (MUST / MUST NOT / SHOULD / SHOULD NOT / MAY) lehnen sich an RFC 2119 an.
 
@@ -9,7 +9,6 @@ Diese Regeldatei gilt für technische Entwicklungs- und Automatisierungsprojekte
 MUST: 
 - Niemals Code vorschlagen, der ein neues Feature ohne zugehöriges Issue + Test einführt.
 - Patch-Ausgaben minimal halten (nur betroffene Zeilen / Dateien, keine kosmetische Reformatierung).
-- Vor Änderungen an Architektur-/Sicherheits-relevanten Dateien prüfen, ob eine passende ADR existiert und referenziert werden muss.
 - Sicherheits- und Geheimnis-Policy beachten: Keine Secrets, Tokens, personenbezogenen Daten generieren, spiegeln oder im Klartext einfügen.
 - Bei Unklarheit (fehlender Pfad, widersprüchliche Anforderungen) Rückfrage einleiten statt zu raten.
 
@@ -26,7 +25,6 @@ MUST NOT:
 - Sicherheitsprüfungen „stumm“ entschärfen (z. B. `|| true` entfernen/ersetzen ohne Hinweis) oder bewusst umgehen.
 
 Escalation / Rückfrage Kriterien (Rückfrage statt Änderung):
-- Fehlende ADR bei architekturrelevantem Eingriff.
 - Ungelöster Merge-Konflikt.
 - Nicht reproduzierbarer Testfehler (unklarer deterministischer Zustand).
 
@@ -53,7 +51,6 @@ Diese Richtlinien definieren universelle Prinzipien für nachhaltige, sichere, n
 - Test- & Qualitätsorientierung (Fehlerprävention vor Nachbesserung)
 - Least Privilege & Minimierung von Angriffs-/Fehleroberflächen
 - Reproduzierbarkeit & Determinismus
-- Evolvierbare Architektur (ADR-gesteuert statt implizit)
 - Dokumentation fokussiert auf Entscheidungen & Betriebsrelevanz
 
 1.3 **Engineering-Lifecycle (abstrakt)**
@@ -89,7 +86,6 @@ Alle Kommentare, Commits, Issues, PR-Bodies und Richtlinien in Deutsch (Ausnahme
 
 1.8 **Dokumentation**
 - Fokus auf Warum + Konsequenzen, nicht redundante Code-Nacherzählung (SHOULD)
-- ADRs für jede signifikante Architektur-/Governance-Entscheidung (MUST)
 - Runbooks für wiederkehrende Betriebsaufgaben (SHOULD)
 
 ## 2. Qualitäts- & Governance-Gates
@@ -120,29 +116,24 @@ Verbindliche Checks vor Merge / Deployment:
 - Test-Suites grün (Unit + definierte höhere Ebenen) (MUST)
 - (MAY) Dry-Run / Konfig-Validierung bei deklarativen Artefakten
 
-2.5 **Architektur & ADR Disziplin**
-- Jede Änderung prüft bestehende ADRs (kein stilles Override)
-- Supersession über neue ADR mit Referenz, niemals Direktedit akzeptierter Historie
-- Temporäre Abweichungen: Issue + Risiko + Ablaufdatum + Dokumentation im ADR Abschnitt "Known Deviations"
-
-2.6 **Beobachtbarkeit & Betrieb**
+2.5 **Beobachtbarkeit & Betrieb**
 - Metriken: Latenz, Durchsatz, Fehlerrate, Ressourcenverbrauch
 - Strukturiertes Logging mit Korrelation / Trace IDs (keine sensiblen Inhalte)
 - Drift-Erkennung (Soll vs. Ist) – Abweichung erzeugt Issue
 - Definierte Wiederherstellungsziele & dokumentierte Backup-/Restore-Pfade
 
-2.7 **Sicherer Änderungsfluss**
+2.6 **Sicherer Änderungsfluss**
 - Kein Direkt-Push auf `main` (MUST)
 - Branch Protection + Status Checks obligatorisch (MUST)
 - Commit Hygiene: kleine, thematisch fokussierte Schritte (SHOULD)
 
-2.8 **Rollback & Reproduzierbarkeit**
+2.7 **Rollback & Reproduzierbarkeit**
 - Jede Release-Version rekonstruierbar (Tag + Artefakt + Konfigurationsstand) (MUST)
 - Keine „floating“ Produktionsabhängigkeiten ohne Versionsbindung (MUST)
 
-2.9 **Qualitätsmetriken & Kontinuierliche Verbesserung**
+2.8 **Qualitätsmetriken & Kontinuierliche Verbesserung**
 - Regelmäßige Auswertung von Fehlerraten, MTTR, Teststabilität, Sicherheitsfunden
-- Erkenntnisse → neue Issues / ADR Anpassungen
+- Erkenntnisse → neue Issues
 
 ## 3. Operativer Workflow (konkret)
 
@@ -187,17 +178,16 @@ gh issue create --title "<Titel>" --body-file tmp/issue-body.md --label "feat"
 ```
 
 ### Quick Start (normativer Kurzablauf)
-1. (MUST) Issue anlegen (Ziel + Akzeptanzkriterien + ADR Referenzen) → **MCP Tools bevorzugt**
+1. (MUST) Issue anlegen (Ziel + Akzeptanzkriterien) → **MCP Tools bevorzugt**
 2. (MUST) Branch vom aktuellen `main` erstellen (konformes Naming) → `git` CLI
 3. (MUST) Failing Test hinzufügen (Red) – kein Produktionscode davor
 4. (MUST) Minimalen Code schreiben bis Tests grün (Green) – kein Scope Creep
 5. (SHOULD) Lint / Security lokal prüfen; (MAY) zusätzliche Scans
-6. (MUST) PR erstellen mit Issue-Referenz + ADR IDs (falls relevant) → **MCP Tools bevorzugt**
+6. (MUST) PR erstellen mit Issue-Referenz → **MCP Tools bevorzugt**
 7. (MUST) Alle Gates grün (Tests, Lint, Security) → Merge via PR → **MCP Tools bevorzugt**
 8. (MUST) Versionierung / Follow-ups / Drift prüfen & Issues nachziehen
 9. (MUST) Vor Issue-Abschluss Pläne, `CHANGELOG.md` und betroffene Dokumentation aktualisieren
 
-Hinweis (ADR Referenz Enforcement): Bei Änderungen an Governance-/Architektur-relevanten Pfaden (`docs/adr/`, `scripts/`, `.github/`, `Makefile`, allgemeine `docs/`) MUSS der PR Body eine ADR Referenz (`ADR-XYZ`) enthalten oder explizit den Skip Marker `ADR-NOT-REQ` mit kurzer Begründung. Fehlt beides, schlägt das ADR Reference Gate fehl. Skip Marker führt nur zu einer Warnung (nicht-blockierend).
 
 3.1 **Einordnung & Mapping**  
 Der folgende Ablauf operationalisiert die Lifecycle-Schritte aus Abschnitt 1.3.
@@ -229,10 +219,10 @@ Diese Targets können ab sofort anstelle der expliziten Befehlsblöcke in 3.2–
 | 6 Sicherheits-/Qualitäts-Checks | CI Gates / Scans (3.6 / Abschnitt 2.4) |
 | 7 Build & Bereitstellung | Release / Tagging (3.7) |
 | 8 Betriebsbeobachtung & Drift | Monitoring & Drift Tickets (2.6) |
-| 9 Verbesserung | Lessons Learned → Issues / ADRs (2.9) |
+| 9 Verbesserung | Lessons Learned → Issues (2.8) |
 
 3.2 **Issue → Branch**
-- Jede Änderung startet mit einem Issue (Ziel + Akzeptanzkriterien + Referenzen zu ADRs)
+- Jede Änderung startet mit einem Issue (Ziel + Akzeptanzkriterien)
 - Branch-Naming: `feat/<kurz>`, `fix/<kurz>`, `chore/<kurz>`, `refactor/<kurz>` oder Issue-ID basiert
 - Keine parallele Vermischung mehrerer unzusammenhängender Ziele
  - Nutzung der bereitgestellten Issue Templates (Feature / Bug) wird erwartet (GitHub UI Auswahl). Blank Issues sind deaktiviert.
@@ -316,7 +306,7 @@ Implements feature XYZ...
 - ❌ Eingerücktes Keyword (Listen, Quotes)
 
 3.5 **Pull Request Review & Workflow**
-- PR referenziert Issue & relevante ADR IDs
+- PR referenziert Issue
 - PR Body: Was / Warum / Risiken / Testnachweis (kurz) – per Datei (`--body-file`)
 - Alle Diskussionen geklärt vor Merge
  - Befehle: PR Erstellung (MUST) / Labels & Diff Web (MAY):
@@ -334,7 +324,6 @@ Implements feature XYZ...
 	 # Labels setzen (falls nötig)
 	 gh pr edit <PR_NR> --add-label "feature"
 
-	 # ADR Referenzen im Body validieren (manuell / MAY: zusätzlicher Check-Script)
 	 ```
 
 3.6 **Pipeline & Gates**
@@ -406,9 +395,8 @@ Hinweis: Der finale Push auf `main` im Zuge des Merge-Vorgangs gilt als einzige 
 3.9 **Post-Merge & Betrieb**
 - Monitoring prüfen (Anomalien?)
 - Offene Folgeaufgaben als Issues erfassen (keine stillen TODOs)
-- ADR Supersessions bei Architekturfolgen zeitnah anstoßen
 - Dokumentationsartefakte (Pläne, `CHANGELOG.md`, Nutzer-/Ops-Doku) auf aktuellen Stand bringen
- - Befehle / Nachbereitung: TODO Scan & Folge-Issue (MUST) / ADR Draft sofort (MAY):
+ - Befehle / Nachbereitung: TODO Scan & Folge-Issue (MUST):
 	 ```bash
 	 # Letzten Merge-Commit anzeigen
 	 git log -1 --oneline
@@ -419,11 +407,6 @@ Hinweis: Der finale Push auf `main` im Zuge des Merge-Vorgangs gilt als einzige 
 	 # Neues Folge-Issue (Beispiel)
 	 gh issue create --title "Follow-up: <konkret>" --body-file tmp/issue-followup-<slug>.md --label chore
 
-	 # ADR Vorschlag Template kopieren (falls neue Entscheidung nötig)
-	 cp docs/adr/000-template.md docs/adr/ADR-<nr>-<slug>.md
-	 git add docs/adr/ADR-<nr>-<slug>.md
-	 git commit -m "docs(adr): propose <slug>"
-	 git push origin <branch>  # falls noch nicht merged oder neuer Branch
 	 ```
 
 3.10 **Kontinuierliche Verbesserung**
@@ -450,7 +433,6 @@ Hinweis: Der finale Push auf `main` im Zuge des Merge-Vorgangs gilt als einzige 
  - Pre-Commit Aktivierung (lokal): `git config core.hooksPath .githooks` (führt u. a. normative Check vor jedem Commit aus).
  - Issue Templates: Siehe `.github/ISSUE_TEMPLATE/` – Issues sollten strukturiert mit Markdown-Headings erstellt werden.
  - PR Body Guidelines: Siehe Abschnitt 3.4 – Closing-Keywords werden automatisch via GitHub Action korrigiert (`.github/workflows/pr-closing-keyword-fix.yml`).
- - ADR Erstellung & Prüfung: Neue ADR via `make adr-new SLUG=<slug>` (Template: `docs/adr/000-template.md`), Validierung mit `scripts/common/check-adr.sh` (läuft auch im CI Workflow `quality-gates`).
  - Issue Body Qualität: CI / zukünftige Hooks KÖNNEN fehlende Pflichtsektionen (Kontext, Ziel, Akzeptanzkriterien) beanstanden.
 
 ## 5. Glossar (Platzhalter / Konventionen)
@@ -463,18 +445,6 @@ Hinweis: Der finale Push auf `main` im Zuge des Merge-Vorgangs gilt als einzige 
 | MUST NOT | Verbot – nicht implementieren |
 | SHOULD NOT | Vermeiden – nur in begründeten Ausnahmefällen |
 
-
-### ADR Kurzreferenz (Zusammenfassung)
-
-| Status | Bedeutung | Aktion bei Änderung |
-|--------|-----------|---------------------|
-| Proposed | In Diskussion | Review, ggf. Anpassungen einpflegen |
-| Accepted | Verbindlich | Bei Widerspruch neue ADR (Supersede) |
-| Superseded | Historisch, ersetzt | Nicht mehr anwenden, nur Referenz |
-| Deprecated | Nutzung auslaufend | Migration planen / Issue anlegen |
-| Rejected | Abgelehnt | Nicht implementieren |
-
-Hinweis: Architekturänderungen ohne passende Accepted ADR sind zu vermeiden (MUST). Supersessions immer bidirektional referenzieren (MUST).
 
 | Platzhalter | Bedeutung | Hinweis |
 |-------------|-----------|---------|
@@ -508,7 +478,6 @@ Dieser Block KANN von Automatisierung / Policies geparst werden (Single Source: 
 		"tests_green_before_merge": "MUST",
 		"security_scans_blockers": "MUST",
 		"version_single_source": "MUST",
-		"adr_reference_on_arch_changes": "MUST",
 		"lint_before_pr": "SHOULD",
 		"format_consistency": "SHOULD",
 		"metrics_review": "MAY"

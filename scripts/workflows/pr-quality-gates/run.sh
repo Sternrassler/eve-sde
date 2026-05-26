@@ -5,12 +5,8 @@ set -euo pipefail
 
 ROOT_DIR=$(cd "$(dirname "$0")/../.." && pwd)
 
-# Normative labels & ADR governance
+# Normative labels
 bash "$ROOT_DIR/common/check-normative.sh"
-bash "$ROOT_DIR/common/check-adr.sh"
-
-# ADR reference enforcement via make target (handles skip markers)
-make adr-ref
 
 # Commit message lint (if script exists)
 if [ -x "$ROOT_DIR/common/check-commit-msg.sh" ]; then
