@@ -34,6 +34,9 @@ func AnalyzeJSONL(path string, maxLines int) (*Schema, error) {
 	}
 
 	scanner := bufio.NewScanner(file)
+	// Einige SDE-JSONL-Zeilen überschreiten das 64-KB-Default-Limit von bufio.Scanner
+	// (z.B. freelanceJobSchemas.jsonl mit ~98 KB). Puffer großzügig erhöhen.
+	scanner.Buffer(make([]byte, 0, 64*1024), 16*1024*1024)
 	lineCount := 0
 
 	// maxLines <= 0 bedeutet: gesamte Datei analysieren

@@ -7,5 +7,6 @@ package types
 // TypeMaterials represents the schema for typeMaterials.jsonl
 type TypeMaterials struct {
 	Key int64 `json:"_key"`
-	Materials []map[string]interface{} `json:"materials"`
+	Materials []map[string]interface{} `json:"materials,omitempty"`
+	RandomizedMaterials []map[string]interface{} `json:"randomizedMaterials,omitempty"`
 }

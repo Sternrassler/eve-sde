@@ -84,6 +84,9 @@ func (imp *Importer) ImportJSONL(tableName, jsonlPath string, structType reflect
 
 	// Stream JSONL
 	scanner := bufio.NewScanner(file)
+	// Einige SDE-JSONL-Zeilen überschreiten das 64-KB-Default-Limit von bufio.Scanner
+	// (z.B. freelanceJobSchemas.jsonl mit ~98 KB). Puffer großzügig erhöhen.
+	scanner.Buffer(make([]byte, 0, 64*1024), 16*1024*1024)
 	count := 0
 
 	for scanner.Scan() {
