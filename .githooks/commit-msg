@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # commit-msg – Validiert Commit Message Konventionen
 # Aktivierung: git config core.hooksPath .githooks
-# Referenz: copilot-instructions.md Abschnitt 2.7
 
 set -euo pipefail
 

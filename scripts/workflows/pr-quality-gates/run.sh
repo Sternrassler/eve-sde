@@ -5,9 +5,6 @@ set -euo pipefail
 
 ROOT_DIR=$(cd "$(dirname "$0")/../.." && pwd)
 
-# Normative labels
-bash "$ROOT_DIR/common/check-normative.sh"
-
 # Commit message lint (if script exists)
 if [ -x "$ROOT_DIR/common/check-commit-msg.sh" ]; then
   RANGE=${COMMIT_LINT_RANGE:-origin/main..HEAD}

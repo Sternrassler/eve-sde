@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- SemVer-Quelle ist jetzt ausschließlich `CHANGELOG.md` + git-Tags. `release-check`/`release` lesen die Version aus dem CHANGELOG.
+
+### Removed
+
+- `VERSION`-Datei — SemVer lebt nur noch im CHANGELOG
+- Copilot-Governance: `.github/copilot-instructions.md`, `scripts/common/check-normative.sh` (inkl. pre-commit/CI-Aufruf), Copilot-Bot-Skip in der Commit-Message-Prüfung und `copilot-instructions.md`-Verweise
+
 ## [0.2.0] - 2025-10-25
 
 ### Removed

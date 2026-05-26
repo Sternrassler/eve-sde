@@ -161,10 +161,7 @@ go build ./cmd/sde-to-sqlite
 **Engineering-Richtlinien:**
 
 - TDD (Test-Driven Development)
-- ADRs für Architektur-Entscheidungen
-- Normative Standards (MUST/SHOULD/MAY)
-
-Details: [.github/copilot-instructions.md](.github/copilot-instructions.md)
+- Conventional Commits (erzwungen via `.githooks`)
 
 ## Lizenz
 
