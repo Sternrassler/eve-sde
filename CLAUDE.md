@@ -1,8 +1,8 @@
 # eve-sde
 
 SQLite-DB-Generator für EVE Static Data Export (Go 1.25). Hauptprodukt:
-`eve-sde.db` (~405 MB) unter `data/`, wird von `eve-o-provit` via `pkg/evedb`
-eingebunden. Package-Struktur & Schema-Typen: [→ ../docs/eve-sde.md](../docs/eve-sde.md).
+`eve-sde.db` (~405 MB) unter `data/`, wird von `eve-o-provit` via
+`backend/pkg/evedb` eingebunden. Package-Struktur & Schema-Typen: [→ ../docs/eve-sde.md](../docs/eve-sde.md).
 
 ## Commands
 

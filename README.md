@@ -64,20 +64,21 @@ Legacy-Dokumentation: [docs/cargo-api.md](docs/cargo-api.md)
 ```text
 eve-sde/
 ├── cmd/                     # Build-Tools (lokal)
+│   ├── sde-schema-gen/      # Schema-/Struct-Generator
+│   ├── sde-sync/            # Download & Sync Orchestrator
 │   ├── sde-to-sqlite/       # DB Import (JSONL → SQLite)
-│   └── sde-sync/            # Download & Sync Orchestrator
+│   └── sde-version-check/   # SDE-Versionsprüfung
 ├── internal/                # DB-Core Implementation
-│   ├── sqlite/
-│   │   ├── schema/          # DDL Generator
-│   │   ├── importer/        # JSONL Streaming Importer
-│   │   └── views/           # SQL Views (Navigation, Cargo, Stats)
-│   └── schema/types/        # 53 Go Structs (generiert)
+│   ├── registry/            # Tabellen-Mappings (generiert)
+│   ├── schema/types/        # Go Structs (generiert)
+│   ├── sde/                 # SDE-Verarbeitung (version)
+│   └── sqlite/
+│       ├── schema/          # DDL Generator
+│       ├── importer/        # JSONL Streaming Importer
+│       └── views/           # SQL Views (Navigation, Cargo, Stats)
 ├── data/                    # Lokale Daten (gitignored)
-│   └── sqlite/eve-sde.db    # **HAUPTPRODUKT**
+│   └── eve-sde.db           # **HAUPTPRODUKT**
 └── docs/                    # Technische Dokumentation
-    ├── adr/                 # Architektur-Entscheidungen
-    ├── navigation.md        # Navigation System Docs (Legacy)
-    └── cargo-api.md         # Cargo API Docs (Legacy)
 ```
 
 **Nutzung:**
@@ -110,19 +111,20 @@ ls -lh data/sqlite/eve-sde.db  # 405 MB
 
 ## Datenbank-Schema
 
-**41 Tabellen:**
+**60 Tabellen** (Mappings in `internal/registry/`):
 
 - `types` (50k Zeilen) - Items, Ships, Modules
 - `mapSolarSystems` (5.7k) - Systeme mit Security Status
 - `mapStargates` (11.5k) - Stargate-Verbindungen
 - `groups`, `categories`, `regions`, `constellations`, ...
 
-**7 SQL Views:**
+**8 SQL Views:**
 
 - `v_stargate_graph` - Pathfinding Graph
 - `v_system_info` - System-Metadaten
 - `v_item_volumes`, `v_ship_cargo_capacities` - Cargo Calculations
 - `v_trade_hubs` - Major Trade Hubs (Jita, Amarr, etc.)
+- `v_route_security_analysis` - Routen-Sicherheits-Analyse
 - `v_region_stats`, `v_system_security_zones` - Region Intelligence
 
 ```sql
