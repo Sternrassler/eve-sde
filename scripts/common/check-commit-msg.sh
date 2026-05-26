@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # check-commit-msg.sh – Validiert Commit Message Konventionen (Conventional Commits)
-# Referenz: copilot-instructions.md Abschnitt 2.7
 
 set -euo pipefail
 
@@ -38,16 +37,7 @@ validate_message() {
     
     # Erster Zeile extrahieren
     first_line=$(echo "$msg" | head -n1)
-    
-    # GitHub Copilot Bot Commits überspringen (automatisch generiert)
-    if [ -n "$commit_hash" ]; then
-        commit_author=$(git log -1 --pretty=%an "$commit_hash" 2>/dev/null || echo "")
-        if echo "$commit_author" | grep -qE "copilot.*bot|Copilot.*Agent"; then
-            echo "  ⏩ Übersprungen (Copilot Bot Commit): '$first_line' (Author: $commit_author)"
-            return 0
-        fi
-    fi
-    
+
     # GitHub Merge-Commits überspringen (automatisch generiert)
     if echo "$first_line" | grep -qE "^Merge [0-9a-f]{40} into [0-9a-f]{40}$"; then
         echo "  ⏩ Übersprungen (GitHub Merge-Commit): '$first_line'"

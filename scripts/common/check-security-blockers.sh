@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # check-security-blockers.sh – Parst Trivy JSON Report auf kritische Findings
-# Referenz: copilot-instructions.md Abschnitt 2.3, 2.4
 
 set -euo pipefail
 

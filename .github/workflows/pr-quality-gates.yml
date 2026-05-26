@@ -7,7 +7,7 @@ on:
 
 jobs:
   quality:
-    name: Normative & Policy Checks
+    name: Commit & Security Checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
