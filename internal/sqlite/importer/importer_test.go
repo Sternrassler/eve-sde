@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -309,6 +310,11 @@ func TestImportJSONL_InvalidFile(t *testing.T) {
 	}
 }
 
+// TestImportJSONL_InvalidJSON stellt sicher, dass eine fehlerhafte JSONL-Zeile
+// fail-loud abbricht statt still übersprungen zu werden (Issue #12): eine
+// korrupte/schema-driftete Zeile = versteckter Datenverlust. Der Import muss
+// hart abbrechen und Zeilennummer + Fehler melden, damit der Datenverlust
+// sichtbar wird.
 func TestImportJSONL_InvalidJSON(t *testing.T) {
 	tmpDir := t.TempDir()
 	tmpDB := filepath.Join(tmpDir, "test.db")
@@ -319,7 +325,7 @@ func TestImportJSONL_InvalidJSON(t *testing.T) {
 		Name string `json:"name"`
 	}
 
-	// JSONL mit fehlerhafter Zeile
+	// JSONL mit fehlerhafter Zeile (Zeile 2)
 	jsonlContent := `{"_key":1,"name":"Valid"}
 {invalid json}
 {"_key":2,"name":"AlsoValid"}
@@ -335,17 +341,22 @@ func TestImportJSONL_InvalidJSON(t *testing.T) {
 	createSQL := `CREATE TABLE test (_key INTEGER, name TEXT)`
 	imp.db.Exec(createSQL)
 
-	// Import sollte fehlerhafte Zeilen überspringen
+	// Import MUSS bei fehlerhafter Zeile hart abbrechen (fail-loud).
 	err := imp.ImportJSONL("test", tmpJSONL, reflect.TypeOf(SimpleType{}))
-	if err != nil {
-		t.Fatalf("ImportJSONL should skip invalid lines: %v", err)
+	if err == nil {
+		t.Fatal("ImportJSONL must fail loud on malformed JSONL line, got nil error")
 	}
 
-	// Nur 2 valide Zeilen sollten importiert sein
+	// Fehler muss die Zeilennummer der korrupten Zeile nennen.
+	if !strings.Contains(err.Error(), "line 2") {
+		t.Errorf("error %q should reference the malformed line number (line 2)", err.Error())
+	}
+
+	// Transaktion muss zurückgerollt sein: keine Teil-Daten committed.
 	var count int
 	imp.db.QueryRow("SELECT COUNT(*) FROM test").Scan(&count)
-	if count != 2 {
-		t.Errorf("Row count = %d, want 2 (invalid line skipped)", count)
+	if count != 0 {
+		t.Errorf("Row count = %d, want 0 (transaction must roll back on failure)", count)
 	}
 }
 
