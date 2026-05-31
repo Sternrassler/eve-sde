@@ -88,12 +88,21 @@ func (imp *Importer) ImportJSONL(tableName, jsonlPath string, structType reflect
 	// (z.B. freelanceJobSchemas.jsonl mit ~98 KB). Puffer großzügig erhöhen.
 	scanner.Buffer(make([]byte, 0, 64*1024), 16*1024*1024)
 	count := 0
+	lineNo := 0
 
 	for scanner.Scan() {
-		// Parse JSON
+		lineNo++
+
+		// Leerzeilen (z.B. trailing newline) sind keine Korruption – überspringen.
+		if len(strings.TrimSpace(scanner.Text())) == 0 {
+			continue
+		}
+
+		// Parse JSON. Eine fehlerhafte Zeile bedeutet Schema-Drift oder Korruption
+		// und damit stillen Datenverlust – deshalb fail-loud: abbrechen statt skippen.
 		data := make(map[string]interface{})
 		if err := json.Unmarshal(scanner.Bytes(), &data); err != nil {
-			continue // Skip fehlerhafte Zeilen
+			return fmt.Errorf("malformed JSONL in %s at line %d: %w", jsonlPath, lineNo, err)
 		}
 
 		// Werte extrahieren und einfügen
