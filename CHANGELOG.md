@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-05-31
+
 ### Changed
 
 - SemVer-Quelle ist jetzt ausschließlich `CHANGELOG.md` + git-Tags. `release-check`/`release` lesen die Version aus dem CHANGELOG.
@@ -15,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `VERSION`-Datei — SemVer lebt nur noch im CHANGELOG
 - Copilot-Governance: `.github/copilot-instructions.md`, `scripts/common/check-normative.sh` (inkl. pre-commit/CI-Aufruf), Copilot-Bot-Skip in der Commit-Message-Prüfung und `copilot-instructions.md`-Verweise
+
+### Fixed
+
+- **JSONL-Import bricht jetzt laut ab statt stillem Datenverlust (#12).** Eine fehlerhafte/inkompatible JSONL-Zeile wurde bisher mit `continue` übersprungen — korruptes oder schema-driftendes SDE führte so zu stillem Datenverlust (falscher Import-Count, kein Log). Der Importer gibt jetzt einen Fehler mit Datei + Zeilennummer zurück; die umschließende Transaktion rollt zurück, sodass keine Teildaten committet werden.
 
 ## [0.2.0] - 2025-10-25
 
