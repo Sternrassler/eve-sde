@@ -17,11 +17,12 @@ SQLite-DB-Generator für EVE Static Data Export (Go 1.25). Hauptprodukt:
 - `make sync-force` — ignoriert die Versionsprüfung.
 - `make sync-download-only` — nur Download + Schema-Gen, kein SQLite-Import.
 - `make pr-check` — lokales PR-Gate: `lint + test + scan`.
-- `make ci-local` — spiegelt die CI-Gates lokal (test + scan); `make pr-quality-gates-ci` ist das volle PR-Gate (commit-lint + Trivy-Scan + Blocker-Check).
+- `make ci-local` — spiegelt die CI-Gates lokal (test + scan); `make pr-quality-gates-ci` ist das volle PR-Gate (`scripts/workflows/pr-quality-gates/run.sh`: commit-lint + `make scan-json` + `check-security-blockers.sh`; Release-Label-Check nur bei `CHECK_RELEASE_LABEL=1`).
 
 ## Lint & Test
 
-- `make test`, `make lint` und `make lint-ci` sind aktuell **echo-only Platzhalter** ("Keine Tests/kein Lint-Tool konfiguriert") — kein echter Test-/Lint-Lauf.
+- `make test`, `make lint` und `make lint-ci` sind aktuell **echo-only Platzhalter** ("Keine Tests/kein Lint-Tool konfiguriert") — kein echter Test-/Lint-Lauf. Folge: CI (`lint-test.yml` → `make push-ci`) fährt **keine** echten Tests.
+- Es existieren dennoch reale Go-Tests (7 `_test.go` in `internal/sqlite/importer`, `internal/sqlite/schema`, `internal/sde/version`) — manuell via `go test ./...` ausführen, nicht über `make test`.
 - Das **echte Linting** läuft über golangci-lint v2 (`.golangci.yml`, 7 Linter: govet, errcheck, staticcheck, unused, ineffassign, gocritic, misspell) — ausgelöst durch den `.githooks/pre-commit`-Hook (`golangci-lint run --new-from-rev=HEAD~1`), nicht durch einen Make-Target.
 
 ## Gotchas
